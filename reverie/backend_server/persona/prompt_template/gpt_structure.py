@@ -10,8 +10,11 @@ import openai
 import time 
 
 from utils import *
+from models import EmbeddingModel
 
 openai.api_key = openai_api_key
+
+embeddings = EmbeddingModel()
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
@@ -273,12 +276,14 @@ def safe_generate_response(prompt,
   return fail_safe_response
 
 
-def get_embedding(text, model="text-embedding-ada-002"):
+def get_embedding(text, model=EMBEDDING_MODEL_NAME):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
-  return openai.Embedding.create(
-          input=[text], model=model)['data'][0]['embedding']
+  # return openai.Embedding.create(
+  #         input=[text], model=model)['data'][0]['embedding']
+  return embeddings.create(input=text, model=model)
+
 
 
 if __name__ == '__main__':

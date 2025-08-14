@@ -55,6 +55,14 @@ class ReverieServer:
     # reverie/meta/json's fork variable. 
     self.sim_code = sim_code
     sim_folder = f"{fs_storage}/{self.sim_code}"
+    
+    print(f"fork_folder: {fork_folder}")
+    print(f"sim_folder: {sim_folder}")
+
+    # Check if sim_folder exists and delete it to avoid errors
+    if os.path.exists(sim_folder):
+        shutil.rmtree(sim_folder)
+    
     copyanything(fork_folder, sim_folder)
 
     with open(f"{sim_folder}/reverie/meta.json") as json_file:  
@@ -605,8 +613,13 @@ if __name__ == '__main__':
   #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
   # rs.open_server()
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
+  origin = default_forked_simulation_name
+  if origin == "":
+    origin = input("Enter the name of the forked simulation: ").strip()
+
+  target = default_new_simulation_name
+  if target == "":
+    target = input("Enter the name of the new simulation: ").strip()
 
   rs = ReverieServer(origin, target)
   rs.open_server()
