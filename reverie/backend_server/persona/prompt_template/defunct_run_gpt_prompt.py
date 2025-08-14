@@ -13,6 +13,7 @@ import sys
 sys.path.append('../../')
 
 from global_methods import *
+from utils import *
 from persona.prompt_template.gpt_structure import *
 from persona.prompt_template.print_prompt import *
 
@@ -67,7 +68,7 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
     fs = 8
     return fs
 
-  gpt_param = {"engine": "text-davinci-002", "max_tokens": 5, 
+  gpt_param = {"engine": TEXT_DAVINCI_002, "max_tokens": 5, 
              "temperature": 0.8, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
   prompt_template = "persona/prompt_template/v2/wake_up_hour_v1.txt"
@@ -518,7 +519,7 @@ def run_gpt_prompt_action_sector(action_description,
     fs = ("kitchen")
     return fs
 
-  gpt_param = {"engine": "text-davinci-002", "max_tokens": 15, 
+  gpt_param = {"engine": TEXT_DAVINCI_002, "max_tokens": 15, 
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   prompt_template = "persona/prompt_template/v1/action_location_sector_v2.txt"

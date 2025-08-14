@@ -6,15 +6,16 @@ Description: Wrapper functions for calling OpenAI APIs.
 """
 import json
 import random
-import openai
+# import openai
 import time 
 
 from utils import *
-from models import EmbeddingModel
+from persona.prompt_template.models import EmbeddingModel, LLMModel
 
-openai.api_key = openai_api_key
+# openai.api_key = openai_api_key
 
 embeddings = EmbeddingModel()
+llm = LLMModel()
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
@@ -22,11 +23,17 @@ def temp_sleep(seconds=0.1):
 def ChatGPT_single_request(prompt): 
   temp_sleep()
 
-  completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
-    messages=[{"role": "user", "content": prompt}]
-  )
-  return completion["choices"][0]["message"]["content"]
+  # completion = openai.ChatCompletion.create(
+  #   model="gpt-3.5-turbo", 
+  #   messages=[{"role": "user", "content": prompt}]
+  # )
+  # return completion["choices"][0]["message"]["content"]
+
+  return llm.create(model=GPT_3_5_TURBO, input=prompt)
+  
+
+
+
 
 
 # ============================================================================
@@ -47,16 +54,19 @@ def GPT4_request(prompt):
   """
   temp_sleep()
 
-  try: 
-    completion = openai.ChatCompletion.create(
-    model="gpt-4", 
-    messages=[{"role": "user", "content": prompt}]
-    )
-    return completion["choices"][0]["message"]["content"]
+  # try: 
+    # completion = openai.ChatCompletion.create(
+    # model="gpt-4", 
+    # messages=[{"role": "user", "content": prompt}]
+    # )
+    # return completion["choices"][0]["message"]["content"]
   
-  except: 
-    print ("ChatGPT ERROR")
-    return "ChatGPT ERROR"
+  try:
+    return llm.create(model=GPT_4, input=prompt)
+
+  except Exception as e: 
+    print (e)
+    return e
 
 
 def ChatGPT_request(prompt): 
@@ -72,16 +82,19 @@ def ChatGPT_request(prompt):
     a str of GPT-3's response. 
   """
   # temp_sleep()
-  try: 
-    completion = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo", 
-    messages=[{"role": "user", "content": prompt}]
-    )
-    return completion["choices"][0]["message"]["content"]
+  # try: 
+  #   completion = openai.ChatCompletion.create(
+  #   model="gpt-3.5-turbo", 
+  #   messages=[{"role": "user", "content": prompt}]
+  #   )
+  #   return completion["choices"][0]["message"]["content"]
   
-  except: 
-    print ("ChatGPT ERROR")
-    return "ChatGPT ERROR"
+  try:
+    return llm.create(model=GPT_3_5_TURBO, input=prompt)
+  except Exception as e:
+    print (e)
+    return e
+
 
 
 def GPT4_safe_generate_response(prompt, 
@@ -197,7 +210,7 @@ def ChatGPT_safe_generate_response_OLD(prompt,
 # ###################[SECTION 2: ORIGINAL GPT-3 STRUCTURE] ###################
 # ============================================================================
 
-def GPT_request(prompt, gpt_parameter): 
+def GPT_request(prompt, gpt_parameter, schema=None): 
   """
   Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
   server and returns the response. 
@@ -211,20 +224,31 @@ def GPT_request(prompt, gpt_parameter):
   """
   temp_sleep()
   try: 
-    response = openai.Completion.create(
-                model=gpt_parameter["engine"],
-                prompt=prompt,
-                temperature=gpt_parameter["temperature"],
-                max_tokens=gpt_parameter["max_tokens"],
-                top_p=gpt_parameter["top_p"],
-                frequency_penalty=gpt_parameter["frequency_penalty"],
-                presence_penalty=gpt_parameter["presence_penalty"],
-                stream=gpt_parameter["stream"],
-                stop=gpt_parameter["stop"],)
-    return response.choices[0].text
-  except: 
-    print ("TOKEN LIMIT EXCEEDED")
-    return "TOKEN LIMIT EXCEEDED"
+    # response = openai.Completion.create(
+    #             model=gpt_parameter["engine"],
+    #             prompt=prompt,
+    #             temperature=gpt_parameter["temperature"],
+    #             max_tokens=gpt_parameter["max_tokens"],
+    #             top_p=gpt_parameter["top_p"],
+    #             frequency_penalty=gpt_parameter["frequency_penalty"],
+    #             presence_penalty=gpt_parameter["presence_penalty"],
+    #             stream=gpt_parameter["stream"],
+    #             stop=gpt_parameter["stop"],)
+    # return response.choices[0].text
+    return llm.create(
+      model=gpt_parameter["engine"],
+      input=prompt,
+      temperature=gpt_parameter["temperature"],
+      max_tokens=gpt_parameter["max_tokens"],
+      top_p=gpt_parameter["top_p"],
+      frequency_penalty=gpt_parameter["frequency_penalty"],
+      presence_penalty=gpt_parameter["presence_penalty"],
+      stream=gpt_parameter["stream"],
+      stop=gpt_parameter["stop"],
+      schema=schema)
+  except Exception as e: 
+    print (e)
+    return e
 
 
 def generate_prompt(curr_input, prompt_lib_file): 
@@ -261,12 +285,14 @@ def safe_generate_response(prompt,
                            fail_safe_response="error",
                            func_validate=None,
                            func_clean_up=None,
-                           verbose=False): 
-  if verbose: 
+                           schema=None,
+                           verbose=False):
+  if verbose or debug: 
     print (prompt)
 
   for i in range(repeat): 
-    curr_gpt_response = GPT_request(prompt, gpt_parameter)
+    curr_gpt_response = GPT_request(prompt, gpt_parameter,schema)
+    print(f"curr_gpt_response !!!!: {curr_gpt_response}")
     if func_validate(curr_gpt_response, prompt=prompt): 
       return func_clean_up(curr_gpt_response, prompt=prompt)
     if verbose: 
