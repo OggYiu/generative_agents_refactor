@@ -439,7 +439,11 @@ class ReverieServer:
     sim_folder = f"{fs_storage}/{self.sim_code}"
 
     while True: 
-      sim_command = input("Enter option: ")
+      if default_sim_command is not None:
+          sim_command = default_sim_command
+          print(f"Enter option:{sim_command}")
+      else:
+          sim_command = input("Enter option: ")
       sim_command = sim_command.strip()
       ret_str = ""
 

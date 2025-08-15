@@ -281,7 +281,7 @@ def generate_prompt(curr_input, prompt_lib_file):
 
 def safe_generate_response(prompt, 
                            gpt_parameter,
-                           repeat=5,
+                           repeat=1,
                            fail_safe_response="error",
                            func_validate=None,
                            func_clean_up=None,
@@ -292,9 +292,11 @@ def safe_generate_response(prompt,
 
   for i in range(repeat): 
     curr_gpt_response = GPT_request(prompt, gpt_parameter,schema)
-    print(f"curr_gpt_response !!!!: {curr_gpt_response}")
     if func_validate(curr_gpt_response, prompt=prompt): 
       return func_clean_up(curr_gpt_response, prompt=prompt)
+    else:
+      if verbose or debug:
+        print(f"failed validation: {curr_gpt_response}")
     if verbose: 
       print ("---- repeat count: ", i, curr_gpt_response)
       print (curr_gpt_response)
@@ -313,7 +315,7 @@ def get_embedding(text, model=EMBEDDING_MODEL_NAME):
 
 
 if __name__ == '__main__':
-  gpt_parameter = {"engine": "text-davinci-003", "max_tokens": 50, 
+  gpt_parameter = {"engine": TEXT_DAVINCI_003, "max_tokens": 50, 
                    "temperature": 0, "top_p": 1, "stream": False,
                    "frequency_penalty": 0, "presence_penalty": 0, 
                    "stop": ['"']}
