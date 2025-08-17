@@ -1,0 +1,44 @@
+GNS FUNCTION: <generate_first_daily_plan>
+Name: Isabella Rodriguez
+Age: 34
+Innate traits: friendly, outgoing, hospitable
+Learned traits: Isabella Rodriguez is a cafe owner of Hobbs Cafe who loves to make people feel welcome. She is always looking for ways to make the cafe a place where people can come to relax and enjoy themselves.
+Currently: Isabella Rodriguez is planning on having a Valentine's Day party at Hobbs Cafe with her customers on February 14th, 2023 at 5pm. She is gathering party material, and is telling everyone to join the party at Hobbs Cafe on February 14th, 2023, from 5pm to 7pm.
+Lifestyle: Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.
+Daily plan requirement: Isabella Rodriguez opens Hobbs Cafe at 8am everyday, and works at the counter until 8pm, at which point she closes the cafe.
+Current Date: Monday February 13
+
+
+In general, Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.
+Today is Monday February 13. Here is Isabella's plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm): 1) wake up and complete the morning routine at 6:00 am, 2)
+=== persona/prompt_template/v2/daily_planning_v6.txt
+~~~ persona    ---------------------------------------------------
+Isabella Rodriguez
+
+~~~ gpt_param ----------------------------------------------------
+{'engine': 'gpt-4', 'max_tokens': 500, 'temperature': 1, 'top_p': 1, 'stream': False, 'frequency_penalty': 0, 'presence_penalty': 0, 'stop': None}
+
+~~~ prompt_input    ----------------------------------------------
+["Name: Isabella Rodriguez\nAge: 34\nInnate traits: friendly, outgoing, hospitable\nLearned traits: Isabella Rodriguez is a cafe owner of Hobbs Cafe who loves to make people feel welcome. She is always looking for ways to make the cafe a place where people can come to relax and enjoy themselves.\nCurrently: Isabella Rodriguez is planning on having a Valentine's Day party at Hobbs Cafe with her customers on February 14th, 2023 at 5pm. She is gathering party material, and is telling everyone to join the party at Hobbs Cafe on February 14th, 2023, from 5pm to 7pm.\nLifestyle: Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.\nDaily plan requirement: Isabella Rodriguez opens Hobbs Cafe at 8am everyday, and works at the counter until 8pm, at which point she closes the cafe.\nCurrent Date: Monday February 13\n", 'Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.', 'Monday February 13', 'Isabella', '6:00 am']
+
+~~~ prompt    ----------------------------------------------------
+Name: Isabella Rodriguez
+Age: 34
+Innate traits: friendly, outgoing, hospitable
+Learned traits: Isabella Rodriguez is a cafe owner of Hobbs Cafe who loves to make people feel welcome. She is always looking for ways to make the cafe a place where people can come to relax and enjoy themselves.
+Currently: Isabella Rodriguez is planning on having a Valentine's Day party at Hobbs Cafe with her customers on February 14th, 2023 at 5pm. She is gathering party material, and is telling everyone to join the party at Hobbs Cafe on February 14th, 2023, from 5pm to 7pm.
+Lifestyle: Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.
+Daily plan requirement: Isabella Rodriguez opens Hobbs Cafe at 8am everyday, and works at the counter until 8pm, at which point she closes the cafe.
+Current Date: Monday February 13
+
+
+In general, Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.
+Today is Monday February 13. Here is Isabella's plan today in broad-strokes (with the time of the day. e.g., have a lunch at 12:00 pm, watch TV from 7 to 8 pm): 1) wake up and complete the morning routine at 6:00 am, 2)
+
+~~~ raw output    ----------------------------------------------------
+open Hobbs Cafe at 8:00 am, 3) run the cafe's counter until 12:00 pm, 4) have lunch from 12:00 pm to 1:00 pm, 5) continue working at the counter until 5:00 pm, 6) From 5:00 pm to 6:00 pm start decorating the cafe and prepare for the Valentine's Day party, 7) continue working at the cafe's counter from 6:00 pm to 8:00 pm, 8) close the cafe at 8:00 pm, 9) return home and unwind until 9:00 pm, 10) from 9:00 pm to 10:00 pm review the preparation progress for the Valentine's Day party, 11) wind down and relax from 10:00 pm to 11:00 pm before going to bed.
+
+~~~ processed output    ----------------------------------------------------
+['wake up and complete the morning routine at 6:00 am', 'open Hobbs Cafe at 8:00 am', 'work at the counter from 8:00 am to 12:00 pm', 'have a lunch from 12:00 pm to 1:00 pm', 'work at the counter from 1pm to 4pm', "starting preparing for tomorrow's Valentine's Day party from 4:00pm to 6:00 pm", 'work back at the counter from 6pm to 8pm when she closes the cafe']  
+
+=== END ==========================================================

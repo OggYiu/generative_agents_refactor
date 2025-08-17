@@ -25,6 +25,7 @@ def print_run_prompts(prompt_template=None,
                       gpt_param=None, 
                       prompt_input=None,
                       prompt=None, 
+                      raw_output=None,
                       output=None): 
   print (f"=== {prompt_template}")
   print ("~~~ persona    ---------------------------------------------------")
@@ -35,6 +36,8 @@ def print_run_prompts(prompt_template=None,
   print (prompt_input, "\n")
   print ("~~~ prompt    ----------------------------------------------------")
   print (prompt, "\n")
+  print ("~~~ raw_output    ------------------------------------------------")
+  print (raw_output, "\n") 
   print ("~~~ output    ----------------------------------------------------")
   print (output, "\n") 
   print ("=== END ==========================================================")

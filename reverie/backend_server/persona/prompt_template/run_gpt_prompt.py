@@ -78,14 +78,14 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
   fail_safe = get_fail_safe()
 
   # Pydantic
-  class WakeUpHourSchema(BaseModel):
-    content: str = Field(description="the wake up hour of the person")
+  # class WakeUpHourSchema(BaseModel):
+  #   content: str = Field(description="the wake up hour of the person")
     
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up, WakeUpHourSchema)
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+                                   __func_validate, __func_clean_up, None)
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -117,6 +117,8 @@ def run_gpt_prompt_daily_plan(persona,
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
+    print('=================START')
+    print(f"!!!!!!!!!!!!! daily plan gpt_response: {gpt_response}")
     cr = []
     _cr = gpt_response.split(")")
     for i in _cr: 
@@ -124,6 +126,8 @@ def run_gpt_prompt_daily_plan(persona,
         i = i[:-1].strip()
         if i[-1] == "." or i[-1] == ",": 
           cr += [i[:-1].strip()]
+    print(f'processed: {cr}')
+    print('=================END')
     return cr
 
   def __func_validate(gpt_response, prompt=""):
@@ -152,14 +156,14 @@ def run_gpt_prompt_daily_plan(persona,
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
 
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   output = ([f"wake up and complete the morning routine at {wake_up_hour}:00 am"]
               + output)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -284,12 +288,12 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe()
   
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -442,7 +446,7 @@ def run_gpt_prompt_task_decomp(persona,
 
   print ("?????")
   print (prompt)
-  output = safe_generate_response(prompt, gpt_param, 5, get_fail_safe(),
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, get_fail_safe(),
                                    __func_validate, __func_clean_up)
 
   # TODO THERE WAS A BUG HERE... 
@@ -490,7 +494,7 @@ def run_gpt_prompt_task_decomp(persona,
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
     
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -616,7 +620,7 @@ def run_gpt_prompt_action_sector(action_description,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   y = f"{maze.access_tile(persona.scratch.curr_tile)['world']}"
   x = [i.strip() for i in persona.s_mem.get_str_accessible_sectors(y).split(",")]
@@ -628,7 +632,7 @@ def run_gpt_prompt_action_sector(action_description,
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -713,7 +717,7 @@ def run_gpt_prompt_action_arena(action_description,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   print (output)
   # y = f"{act_world}:{act_sector}"
@@ -723,7 +727,7 @@ def run_gpt_prompt_action_arena(action_description,
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
 
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -772,7 +776,7 @@ def run_gpt_prompt_action_game_object(action_description,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   x = [i.strip() for i in persona.s_mem.get_str_accessible_arena_game_objects(temp_address).split(",")]
@@ -781,7 +785,7 @@ def run_gpt_prompt_action_game_object(action_description,
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -840,7 +844,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   example_output = "🛁🧖‍♀️" ########
   special_instruction = "The value for the output must ONLY contain the emojis." ########
   fail_safe = get_fail_safe()
-  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe,
+  output, raw_output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe,
                                           __chat_func_validate, __chat_func_clean_up, True)
   if output != False: 
     return output, [output, prompt, gpt_param, prompt_input, fail_safe]
@@ -864,7 +868,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
 
   # if debug or verbose: 
   #   print_run_prompts(prompt_template, persona, gpt_param, 
-  #                     prompt_input, prompt, output)
+  #                     prompt_input, prompt, raw_output, output)
   
   # return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -946,13 +950,13 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
   prompt_input = create_prompt_input(action_description, persona)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(persona) ########
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   output = (persona.name, output[0], output[1])
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1079,13 +1083,13 @@ def run_gpt_prompt_act_obj_event_triple(act_game_object, act_obj_desc, persona, 
   prompt_input = create_prompt_input(act_game_object, act_obj_desc)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(act_game_object)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   output = (act_game_object, output[0], output[1])
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1226,7 +1230,7 @@ def run_gpt_prompt_new_decomp_schedule(persona,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
   fail_safe = get_fail_safe(main_act_dur, truncated_act_dur)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
   
   # print ("* * * * output")
@@ -1238,7 +1242,7 @@ def run_gpt_prompt_new_decomp_schedule(persona,
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1335,12 +1339,12 @@ def run_gpt_prompt_decide_to_talk(persona, target_persona, retrieved,test_input=
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1433,12 +1437,12 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1576,12 +1580,12 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe(persona, target_persona)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1710,13 +1714,13 @@ def run_gpt_prompt_extract_keywords(persona, description, test_input=None, verbo
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1755,12 +1759,12 @@ def run_gpt_prompt_keyword_to_thoughts(persona, keyword, concept_summary, test_i
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -1813,12 +1817,12 @@ def run_gpt_prompt_convo_to_thoughts(persona,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2132,12 +2136,12 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe(n)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2183,12 +2187,12 @@ def run_gpt_prompt_insight_and_guidance(persona, statements, n, test_input=None,
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe(n)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2607,12 +2611,12 @@ def run_gpt_prompt_generate_next_convo_line(persona, interlocutor_desc, prev_con
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2647,12 +2651,12 @@ def run_gpt_prompt_generate_whisper_inner_thought(persona, whisper, test_input=N
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2684,12 +2688,12 @@ def run_gpt_prompt_planning_thought_on_convo(persona, all_utt, test_input=None, 
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2750,12 +2754,12 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   prompt = generate_prompt(prompt_input, prompt_template)
 
   fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+  output, raw_output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
                                    __func_validate, __func_clean_up)
 
   if debug or verbose: 
     print_run_prompts(prompt_template, persona, gpt_param, 
-                      prompt_input, prompt, output)
+                      prompt_input, prompt, raw_output, output)
   
   return output, [output, prompt, gpt_param, prompt_input, fail_safe]
 
@@ -2792,9 +2796,10 @@ def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=Fal
   prompt = generate_prompt(prompt_input, prompt_template)
   print (prompt)
   fail_safe = get_fail_safe() 
-  output = ChatGPT_safe_generate_response_OLD(prompt, 3, fail_safe,
+  output, raw_output = ChatGPT_safe_generate_response_OLD(prompt, 3, fail_safe,
                         __chat_func_validate, __chat_func_clean_up, verbose)
   print (output)
+  print (raw_output)
   
   gpt_param = {"engine": TEXT_DAVINCI_003, "max_tokens": 50, 
                "temperature": 0, "top_p": 1, "stream": False,

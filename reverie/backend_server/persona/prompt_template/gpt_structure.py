@@ -281,7 +281,7 @@ def generate_prompt(curr_input, prompt_lib_file):
 
 def safe_generate_response(prompt, 
                            gpt_parameter,
-                           repeat=1,
+                           repeat=SAFE_GENERATE_RESPONSE_REPEAT_COUNT,
                            fail_safe_response="error",
                            func_validate=None,
                            func_clean_up=None,
@@ -293,7 +293,7 @@ def safe_generate_response(prompt,
   for i in range(repeat): 
     curr_gpt_response = GPT_request(prompt, gpt_parameter,schema)
     if func_validate(curr_gpt_response, prompt=prompt): 
-      return func_clean_up(curr_gpt_response, prompt=prompt)
+      return func_clean_up(curr_gpt_response, prompt=prompt), curr_gpt_response
     else:
       if verbose or debug:
         print(f"failed validation: {curr_gpt_response}")
@@ -301,7 +301,9 @@ def safe_generate_response(prompt,
       print ("---- repeat count: ", i, curr_gpt_response)
       print (curr_gpt_response)
       print ("~~~~")
-  return fail_safe_response
+
+  raise Exception("Failed to generate response")
+  return fail_safe_response, fail_safe_response
 
 
 def get_embedding(text, model=EMBEDDING_MODEL_NAME):
@@ -333,7 +335,7 @@ if __name__ == '__main__':
     cleaned_response = gpt_response.strip()
     return cleaned_response
 
-  output = safe_generate_response(prompt, 
+  processed_output, raw_output = safe_generate_response(prompt, 
                                  gpt_parameter,
                                  5,
                                  "rest",
@@ -341,7 +343,8 @@ if __name__ == '__main__':
                                  __func_clean_up,
                                  True)
 
-  print (output)
+  print (raw_output)
+  print (processed_output)
 
 
 
