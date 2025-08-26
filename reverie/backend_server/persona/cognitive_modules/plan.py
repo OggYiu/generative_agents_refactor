@@ -9,12 +9,15 @@ import math
 import random 
 import sys
 import time
+
 sys.path.append('../../')
 
 from global_methods import *
 from persona.prompt_template.run_gpt_prompt import *
 from persona.cognitive_modules.retrieve import *
 from persona.cognitive_modules.converse import *
+from persona.prompt_template.run_gpt_prompts.wake_up_hour import *
+from persona.prompt_template.run_gpt_prompts.first_daily_plan import *
 
 ##############################################################################
 # CHAPTER 2: Generate
@@ -35,37 +38,14 @@ def generate_wake_up_hour(persona):
     8
   """
   if debug: print ("GNS FUNCTION: <generate_wake_up_hour>")
-  return int(run_gpt_prompt_wake_up_hour(persona)[0])
+  # return int(run_gpt_prompt_wake_up_hour(persona)[0])
+  return WakeUpHour().run(persona=persona)
 
 
-def generate_first_daily_plan(persona, wake_up_hour): 
-  """
-  Generates the daily plan for the persona. 
-  Basically the long term planning that spans a day. Returns a list of actions
-  that the persona will take today. Usually comes in the following form: 
-  'wake up and complete the morning routine at 6:00 am', 
-  'eat breakfast at 7:00 am',.. 
-  Note that the actions come without a period. 
-
-  Persona state: identity stable set, lifestyle, cur_data_str, first_name
-
-  INPUT: 
-    persona: The Persona class instance 
-    wake_up_hour: an integer that indicates when the hour the persona wakes up 
-                  (e.g., 8)
-  OUTPUT: 
-    a list of daily actions in broad strokes.
-  EXAMPLE OUTPUT: 
-    ['wake up and complete the morning routine at 6:00 am', 
-     'have breakfast and brush teeth at 6:30 am',
-     'work on painting project from 8:00 am to 12:00 pm', 
-     'have lunch at 12:00 pm', 
-     'take a break and watch TV from 2:00 pm to 4:00 pm', 
-     'work on painting project from 4:00 pm to 6:00 pm', 
-     'have dinner at 6:00 pm', 'watch TV from 7:00 pm to 8:00 pm']
-  """
+def generate_first_daily_plan(persona, wake_up_hour):
   if debug: print ("GNS FUNCTION: <generate_first_daily_plan>")
-  return run_gpt_prompt_daily_plan(persona, wake_up_hour)[0]
+  # return run_gpt_prompt_daily_plan(persona, wake_up_hour)[0]
+  return FirstDailyPlan().run(persona=persona, wake_up_hour=wake_up_hour)
 
 
 def generate_hourly_schedule(persona, wake_up_hour): 

@@ -11,6 +11,7 @@ import time
 
 from utils import *
 from persona.prompt_template.models import EmbeddingModel, LLMModel
+from persona.prompt_template.run_gpt_prompts.run_gpt_prompts_base import *
 
 # openai.api_key = openai_api_key
 
@@ -278,6 +279,8 @@ def generate_prompt(curr_input, prompt_lib_file):
     prompt = prompt.split("<commentblockmarker>###</commentblockmarker>")[1]
   return prompt.strip()
 
+def safe_generate_response_new(instance: RunGptPromptsBase):
+  safe_generate_response(instance.prompt, instance.gpt_parameter, instance.repeat, instance.fail_safe_response, instance.func_validate, instance.func_clean_up, instance.schema)
 
 def safe_generate_response(prompt, 
                            gpt_parameter,
@@ -292,8 +295,8 @@ def safe_generate_response(prompt,
 
   for i in range(repeat): 
     curr_gpt_response = GPT_request(prompt, gpt_parameter,schema)
-    if func_validate(curr_gpt_response, prompt=prompt): 
-      return func_clean_up(curr_gpt_response, prompt=prompt), curr_gpt_response
+    if func_validate(gpt_response=curr_gpt_response, prompt=prompt): 
+      return func_clean_up(gpt_response=curr_gpt_response, prompt=prompt), curr_gpt_response
     else:
       if verbose or debug:
         print(f"failed validation: {curr_gpt_response}")

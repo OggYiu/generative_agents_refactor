@@ -117,8 +117,6 @@ def run_gpt_prompt_daily_plan(persona,
     return prompt_input
 
   def __func_clean_up(gpt_response, prompt=""):
-    print('=================START')
-    print(f"!!!!!!!!!!!!! daily plan gpt_response: {gpt_response}")
     cr = []
     _cr = gpt_response.split(")")
     for i in _cr: 
@@ -126,8 +124,6 @@ def run_gpt_prompt_daily_plan(persona,
         i = i[:-1].strip()
         if i[-1] == "." or i[-1] == ",": 
           cr += [i[:-1].strip()]
-    print(f'processed: {cr}')
-    print('=================END')
     return cr
 
   def __func_validate(gpt_response, prompt=""):
@@ -146,8 +142,6 @@ def run_gpt_prompt_daily_plan(persona,
           'go to bed at 11:00 pm'] 
     return fs
 
-
-  
   gpt_param = {"engine": TEXT_DAVINCI_003, "max_tokens": 500, 
                "temperature": 1, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
