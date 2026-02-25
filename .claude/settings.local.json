@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.langchain.com)",
+      "Bash(.venv/Scripts/pip install langchain-ollama)",
+      "Bash(.venv/Scripts/python:*)",
+      "Bash(.venv/Scripts/pip show:*)",
+      "Bash(.venv/Scripts/pip install:*)"
+    ]
+  }
+}

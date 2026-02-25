@@ -55,6 +55,8 @@ class ReverieServer:
     # reverie/meta/json's fork variable. 
     self.sim_code = sim_code
     sim_folder = f"{fs_storage}/{self.sim_code}"
+    if os.path.exists(sim_folder):
+      shutil.rmtree(sim_folder)
     copyanything(fork_folder, sim_folder)
 
     with open(f"{sim_folder}/reverie/meta.json") as json_file:  
@@ -429,10 +431,15 @@ class ReverieServer:
 
     # <sim_folder> points to the current simulation folder.
     sim_folder = f"{fs_storage}/{self.sim_code}"
+    last_command = ""
 
-    while True: 
-      sim_command = input("Enter option: ")
-      sim_command = sim_command.strip()
+    while True:
+      option_prompt = "Enter option"
+      if last_command:
+        option_prompt += f" ({last_command})"
+      sim_command = input(f"{option_prompt}: ").strip()
+      if not sim_command:
+        sim_command = last_command
       ret_str = ""
 
       try: 
@@ -591,6 +598,7 @@ class ReverieServer:
           load_history_via_whisper(self.personas, clean_whispers)
 
         print (ret_str)
+        last_command = sim_command
 
       except:
         traceback.print_exc()
@@ -599,14 +607,42 @@ class ReverieServer:
 
 
 if __name__ == '__main__':
-  # rs = ReverieServer("base_the_ville_isabella_maria_klaus", 
+  # rs = ReverieServer("base_the_ville_isabella_maria_klaus",
   #                    "July1_the_ville_isabella_maria_klaus-step-3-1")
-  # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20", 
+  # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20",
   #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
   # rs.open_server()
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
+  # Load last used inputs if available
+  last_inputs_file = os.path.join(os.path.dirname(__file__), ".last_inputs.json")
+  last_origin = ""
+  last_target = ""
+  if os.path.exists(last_inputs_file):
+    try:
+      with open(last_inputs_file) as f:
+        last_inputs = json.load(f)
+        last_origin = last_inputs.get("origin", "")
+        last_target = last_inputs.get("target", "")
+    except:
+      pass
+
+  origin_prompt = "Enter the name of the forked simulation"
+  if last_origin:
+    origin_prompt += f" ({last_origin})"
+  origin = input(f"{origin_prompt}: ").strip()
+  if not origin:
+    origin = last_origin
+
+  target_prompt = "Enter the name of the new simulation"
+  if last_target:
+    target_prompt += f" ({last_target})"
+  target = input(f"{target_prompt}: ").strip()
+  if not target:
+    target = last_target
+
+  # Save inputs for next time
+  with open(last_inputs_file, "w") as f:
+    json.dump({"origin": origin, "target": target}, f)
 
   rs = ReverieServer(origin, target)
   rs.open_server()
