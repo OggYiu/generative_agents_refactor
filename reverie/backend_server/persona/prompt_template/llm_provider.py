@@ -33,34 +33,119 @@ if llm_provider == "ollama":
     return _embeddings.embed_query(text)
 
 elif llm_provider == "openai":
-  import openai
-  openai.api_key = openai_api_key
+  from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+
+  _chat_llm = ChatOpenAI(model="gpt-3.5-turbo", api_key=openai_api_key)
+  _embeddings = OpenAIEmbeddings(model="text-embedding-ada-002", api_key=openai_api_key)
 
   def chat_request(prompt, model="gpt-3.5-turbo"):
-    completion = openai.ChatCompletion.create(
-      model=model,
-      messages=[{"role": "user", "content": prompt}]
-    )
-    return completion["choices"][0]["message"]["content"]
+    llm = _chat_llm if model == "gpt-3.5-turbo" else ChatOpenAI(model=model, api_key=openai_api_key)
+    response = llm.invoke(prompt)
+    return response.content
 
   def completion_request(prompt, gpt_parameter):
-    response = openai.Completion.create(
-      model=gpt_parameter["engine"],
-      prompt=prompt,
-      temperature=gpt_parameter["temperature"],
-      max_tokens=gpt_parameter["max_tokens"],
-      top_p=gpt_parameter["top_p"],
-      frequency_penalty=gpt_parameter["frequency_penalty"],
-      presence_penalty=gpt_parameter["presence_penalty"],
-      stream=gpt_parameter["stream"],
-      stop=gpt_parameter["stop"],
+    llm = ChatOpenAI(
+      model=gpt_parameter.get("engine", "gpt-3.5-turbo"),
+      api_key=openai_api_key,
+      temperature=gpt_parameter.get("temperature", 0),
+      max_tokens=gpt_parameter.get("max_tokens", None),
+      top_p=gpt_parameter.get("top_p", 1),
+      frequency_penalty=gpt_parameter.get("frequency_penalty", 0),
+      presence_penalty=gpt_parameter.get("presence_penalty", 0),
+      stop=gpt_parameter.get("stop", None),
     )
-    return response.choices[0].text
+    response = llm.invoke(prompt)
+    return response.content
 
   def get_embedding_vec(text):
-    return openai.Embedding.create(
-      input=[text], model="text-embedding-ada-002"
-    )['data'][0]['embedding']
+    return _embeddings.embed_query(text)
+
+elif llm_provider == "claude-proxy":
+  from langchain_openai import ChatOpenAI
+
+  _chat_llm = ChatOpenAI(
+    model="claude-sonnet-4-6",
+    api_key="sk-cli-proxy-api",
+    base_url="http://localhost:8317/v1",
+  )
+
+  def chat_request(prompt, model="claude-sonnet-4-6"):
+    llm = _chat_llm if model == "claude-sonnet-4-6" else ChatOpenAI(
+      model=model, api_key="sk-cli-proxy-api", base_url="http://localhost:8317/v1",
+    )
+    response = llm.invoke(prompt)
+    return response.content
+
+  def completion_request(prompt, gpt_parameter):
+    # Filter out whitespace-only stop sequences (Claude rejects them)
+    stop = gpt_parameter.get("stop", None)
+    if stop:
+      stop = [s for s in stop if s.strip()]
+      if not stop:
+        stop = None
+    force_sonnet = True
+    if force_sonnet:
+      model = "claude-sonnet-4-6"
+    else:
+      model = gpt_parameter.get("engine", "claude-sonnet-4-6")
+    llm = ChatOpenAI(
+      model=model,
+      api_key="sk-cli-proxy-api",
+      base_url="http://localhost:8317/v1",
+      temperature=gpt_parameter.get("temperature", 0),
+      max_tokens=gpt_parameter.get("max_tokens", 4096),
+      top_p=gpt_parameter.get("top_p", 1),
+      stop=stop,
+    )
+    response = llm.invoke(prompt)
+    return response.content
+
+  from langchain_ollama import OllamaEmbeddings
+  _embeddings = OllamaEmbeddings(model=ollama_embedding_model, base_url=ollama_base_url)
+
+  def get_embedding_vec(text):
+    return _embeddings.embed_query(text)
+
+elif llm_provider == "vscode":
+  from langchain_openai import ChatOpenAI
+
+  _chat_llm = ChatOpenAI(
+    model=vscode_model,
+    api_key=vscode_api_key,
+    base_url=vscode_base_url,
+  )
+
+  def chat_request(prompt, model=None):
+    llm = _chat_llm if not model or model == vscode_model else ChatOpenAI(
+      model=model, api_key=vscode_api_key, base_url=vscode_base_url,
+    )
+    response = llm.invoke(prompt)
+    return response.content
+
+  def completion_request(prompt, gpt_parameter):
+    # Filter out whitespace-only stop sequences
+    stop = gpt_parameter.get("stop", None)
+    if stop:
+      stop = [s for s in stop if s.strip()]
+      if not stop:
+        stop = None
+    llm = ChatOpenAI(
+      model=vscode_model,
+      api_key=vscode_api_key,
+      base_url=vscode_base_url,
+      temperature=gpt_parameter.get("temperature", 0),
+      max_tokens=gpt_parameter.get("max_tokens", 4096),
+      top_p=gpt_parameter.get("top_p", 1),
+      stop=stop,
+    )
+    response = llm.invoke(prompt)
+    return response.content
+
+  from langchain_ollama import OllamaEmbeddings
+  _embeddings = OllamaEmbeddings(model=ollama_embedding_model, base_url=ollama_base_url)
+
+  def get_embedding_vec(text):
+    return _embeddings.embed_query(text)
 
 else:
-  raise ValueError(f"Unknown llm_provider: {llm_provider}. Use 'openai' or 'ollama'.")
+  raise ValueError(f"Unknown llm_provider: {llm_provider}. Use 'openai', 'ollama', 'claude-proxy', or 'vscode'.")
