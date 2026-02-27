@@ -1,0 +1,22 @@
+generate_hourly_schedule_v3.txt
+
+Variables:
+!<INPUT 0>! -- Schedule format
+!<INPUT 1>! -- Commonset
+!<INPUT 2>! -- prior_schedule
+!<INPUT 3>! -- intermission_str
+!<INPUT 4>! -- intermission 2
+!<INPUT 5>! -- prompt_ending
+
+<commentblockmarker>###</commentblockmarker>
+Task: Complete the last line of an hourly activity schedule for a character. Output ONLY the brief activity description that finishes the last line. Do not continue the schedule beyond that line. Do not include timestamps, IDs, or the character's name.
+
+Example output: waking up and getting ready for the day
+
+Hourly schedule format:
+!<INPUT 0>!
+===
+!<INPUT 1>!
+!<INPUT 2>!
+!<INPUT 3>!!<INPUT 4>!
+!<INPUT 5>!

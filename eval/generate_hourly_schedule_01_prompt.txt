@@ -30,17 +30,17 @@ Innate traits: friendly, outgoing, hospitable
 Learned traits: Isabella Rodriguez is a cafe owner of Hobbs Cafe who loves to make people feel welcome. She is always looking for ways to make the cafe a place where people can come to relax and enjoy themselves.
 Currently: Isabella Rodriguez is planning on having a Valentine's Day party at Hobbs Cafe with her customers on February 14th, 2023 at 5pm. She is gathering party material, and is telling everyone to join the party at Hobbs Cafe on February 14th, 2023, from 5pm to 7pm.
 Lifestyle: Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.
-Daily plan requirement: Isabella Rodriguez opens Hobbs Cafe at 8am everyday, and works at the counter until 8pm, at which point she closes the cafe.
+Daily plan requirement: Isabella Rodriguez opens Hobbs Cafe at 8am everyday, and works at the counter until 8pm, at which point she closes the cafe.  
 Current Date: Monday February 13
 
 
-[(ID:QNvYGW) Monday February 13 -- 00:00 AM] Activity: Isabella is sleeping
-[(ID:3gymDY) Monday February 13 -- 01:00 AM] Activity: Isabella is sleeping
-[(ID:18Iu9U) Monday February 13 -- 02:00 AM] Activity: Isabella is sleeping
-[(ID:WSwMx0) Monday February 13 -- 03:00 AM] Activity: Isabella is sleeping
-[(ID:4fAA8c) Monday February 13 -- 04:00 AM] Activity: Isabella is sleeping
-[(ID:rOO8Pt) Monday February 13 -- 05:00 AM] Activity: Isabella is sleeping
+[(ID:HuRp9O) Monday February 13 -- 00:00 AM] Activity: Isabella is sleeping
+[(ID:aVLmMm) Monday February 13 -- 01:00 AM] Activity: Isabella is sleeping
+[(ID:Pf7iGh) Monday February 13 -- 02:00 AM] Activity: Isabella is sleeping
+[(ID:MxG9Z8) Monday February 13 -- 03:00 AM] Activity: Isabella is sleeping
+[(ID:rRYkdl) Monday February 13 -- 04:00 AM] Activity: Isabella is sleeping
+[(ID:vFhbNU) Monday February 13 -- 05:00 AM] Activity: Isabella is sleeping
 
 
-Here the originally intended hourly breakdown of Isabella's schedule today: 1) wake up and complete the morning routine at 6:00 am
-[(ID:lfqJMY) Monday February 13 -- 06:00 AM] Activity: Isabella is
+Here the originally intended hourly breakdown of Isabella's schedule today: 1) wake up and complete the morning routine at 6:00 am, 2) wake up and complete the morning routine at 6:00 am, 3) eat breakfast at 7:00 am, 4) read a book from 8:00 am to 12:00 pm, 5) have lunch at 12:00 pm, 6) take a nap from 1:00 pm to 4:00 pm, 7) relax and watch TV from 7:00 pm to 8:00 pm, 8) go to bed at 11:00 pm
+[(ID:LKE8he) Monday February 13 -- 06:00 AM] Activity: Isabella is

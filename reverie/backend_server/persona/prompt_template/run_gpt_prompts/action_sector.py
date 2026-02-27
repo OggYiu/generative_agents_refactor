@@ -1,0 +1,100 @@
+from persona.prompt_template.run_gpt_prompts._common import *
+
+
+def run_gpt_prompt_action_sector(action_description,
+                                persona,
+                                maze,
+                                test_input=None,
+                                verbose=False):
+  def create_prompt_input(action_description, persona, maze, test_input=None):
+    act_world = f"{maze.access_tile(persona.scratch.curr_tile)['world']}"
+
+    prompt_input = []
+
+    prompt_input += [persona.scratch.get_str_name()]
+    prompt_input += [persona.scratch.living_area.split(":")[1]]
+    x = f"{act_world}:{persona.scratch.living_area.split(':')[1]}"
+    prompt_input += [persona.s_mem.get_str_accessible_sector_arenas(x)]
+
+
+    prompt_input += [persona.scratch.get_str_name()]
+    prompt_input += [f"{maze.access_tile(persona.scratch.curr_tile)['sector']}"]
+    x = f"{act_world}:{maze.access_tile(persona.scratch.curr_tile)['sector']}"
+    prompt_input += [persona.s_mem.get_str_accessible_sector_arenas(x)]
+
+    if persona.scratch.get_str_daily_plan_req() != "":
+      prompt_input += [f"\n{persona.scratch.get_str_daily_plan_req()}"]
+    else:
+      prompt_input += [""]
+
+
+    # MAR 11 TEMP
+    accessible_sector_str = persona.s_mem.get_str_accessible_sectors(act_world)
+    curr = accessible_sector_str.split(", ")
+    fin_accessible_sectors = []
+    for i in curr:
+      if "'s house" in i:
+        if persona.scratch.last_name in i:
+          fin_accessible_sectors += [i]
+      else:
+        fin_accessible_sectors += [i]
+    accessible_sector_str = ", ".join(fin_accessible_sectors)
+    # END MAR 11 TEMP
+
+    prompt_input += [accessible_sector_str]
+
+
+
+    action_description_1 = action_description
+    action_description_2 = action_description
+    if "(" in action_description:
+      action_description_1 = action_description.split("(")[0].strip()
+      action_description_2 = action_description.split("(")[-1][:-1]
+    prompt_input += [persona.scratch.get_str_name()]
+    prompt_input += [action_description_1]
+
+    prompt_input += [action_description_2]
+    prompt_input += [persona.scratch.get_str_name()]
+    return prompt_input
+
+
+  def __func_clean_up(gpt_response, prompt=""):
+    cleaned_response = gpt_response.split("}")[0]
+    return cleaned_response
+
+  def __func_validate(gpt_response, prompt=""):
+    if len(gpt_response.strip()) < 1:
+      return False
+    if "}" not in gpt_response:
+      return False
+    if "," in gpt_response:
+      return False
+    return True
+
+  def get_fail_safe():
+    fs = ("kitchen")
+    return fs
+
+  gpt_param = {"engine": "text-davinci-002", "max_tokens": 15,
+               "temperature": 0, "top_p": 1, "stream": False,
+               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+  prompt_template = "persona/prompt_template/v1/action_location_sector_v1.txt"
+  prompt_input = create_prompt_input(action_description, persona, maze)
+  prompt = generate_prompt(prompt_input, prompt_template)
+
+  fail_safe = get_fail_safe()
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
+                                   __func_validate, __func_clean_up)
+  y = f"{maze.access_tile(persona.scratch.curr_tile)['world']}"
+  x = [i.strip() for i in persona.s_mem.get_str_accessible_sectors(y).split(",")]
+  if output not in x:
+    # output = random.choice(x)
+    output = persona.scratch.living_area.split(":")[1]
+
+  print ("DEBUG", random.choice(x), "------", output)
+
+  if debug or verbose:
+    print_run_prompts(prompt_template, persona, gpt_param,
+                      prompt_input, prompt, output)
+
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
