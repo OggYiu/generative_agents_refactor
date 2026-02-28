@@ -100,6 +100,11 @@ def GPT4_safe_generate_response(prompt,
     except:
       pass
 
+  print ("FAIL SAFE TRIGGERED: GPT4_safe_generate_response")
+  assert not debug, (
+    f"GPT4_safe_generate_response failed after {repeat} retries. "
+    f"fail_safe_response={fail_safe_response!r}"
+  )
   return False
 
 
@@ -144,6 +149,11 @@ def ChatGPT_safe_generate_response(prompt,
     except:
       pass
 
+  print ("FAIL SAFE TRIGGERED: ChatGPT_safe_generate_response")
+  assert not debug, (
+    f"ChatGPT_safe_generate_response failed after {repeat} retries. "
+    f"fail_safe_response={fail_safe_response!r}"
+  )
   return False
 
 
@@ -169,7 +179,11 @@ def ChatGPT_safe_generate_response_OLD(prompt,
 
     except:
       pass
-  print ("FAIL SAFE TRIGGERED")
+  print ("FAIL SAFE TRIGGERED: ChatGPT_safe_generate_response_OLD")
+  assert not debug, (
+    f"ChatGPT_safe_generate_response_OLD failed after {repeat} retries. "
+    f"fail_safe_response={fail_safe_response!r}"
+  )
   return fail_safe_response
 
 
@@ -243,6 +257,12 @@ def safe_generate_response(prompt,
       print ("---- repeat count: ", i, curr_gpt_response)
       print (curr_gpt_response)
       print ("~~~~")
+  print ("FAIL SAFE TRIGGERED: safe_generate_response")
+  assert not debug, (
+    f"safe_generate_response failed after {repeat} retries. "
+    f"Last response: {curr_gpt_response!r}\n"
+    f"fail_safe_response={fail_safe_response!r}"
+  )
   return fail_safe_response
 
 
