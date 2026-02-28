@@ -1,6 +1,77 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  print ("TOODOOOOOO")
+  print (gpt_response)
+  print ("-==- -==- -==- ")
+
+  # TODO SOMETHING HERE sometimes fails... See screenshot
+  temp = [i.strip() for i in gpt_response.split("\n")]
+  _cr = []
+  cr = []
+  for count, i in enumerate(temp):
+    if count != 0:
+      _cr += [" ".join([j.strip () for j in i.split(" ")][3:])]
+    else:
+      _cr += [i]
+  for count, i in enumerate(_cr):
+    k = [j.strip() for j in i.split("(duration in minutes:")]
+    task = k[0]
+    if task[-1] == ".":
+      task = task[:-1]
+    duration = int(k[1].split(",")[0].strip())
+    cr += [[task, duration]]
+
+  total_expected_min = int(prompt.split("(total duration in minutes")[-1]
+                                 .split("):")[0].strip())
+
+  # TODO -- now, you need to make sure that this is the same as the sum of
+  #         the current action sequence.
+  curr_min_slot = [["dummy", -1],] # (task_name, task_index)
+  for count, i in enumerate(cr):
+    i_task = i[0]
+    i_duration = i[1]
+
+    i_duration -= (i_duration % 5)
+    if i_duration > 0:
+      for j in range(i_duration):
+        curr_min_slot += [(i_task, count)]
+  curr_min_slot = curr_min_slot[1:]
+
+  if len(curr_min_slot) > total_expected_min:
+    last_task = curr_min_slot[60]
+    for i in range(1, 6):
+      curr_min_slot[-1 * i] = last_task
+  elif len(curr_min_slot) < total_expected_min:
+    last_task = curr_min_slot[-1]
+    for i in range(total_expected_min - len(curr_min_slot)):
+      curr_min_slot += [last_task]
+
+  cr_ret = [["dummy", -1],]
+  for task, task_index in curr_min_slot:
+    if task != cr_ret[-1][0]:
+      cr_ret += [[task, 1]]
+    else:
+      cr_ret[-1][1] += 1
+  cr = cr_ret[1:]
+
+  return cr
+
+def validate(gpt_response, prompt=""):
+  # TODO -- this sometimes generates error
+  try:
+    clean_up(gpt_response)
+  except:
+    pass
+    # return False
+  return gpt_response
+
+def fail_safe():
+  fs = ["asleep"]
+  return fs
+
+
 def run_gpt_prompt_task_decomp(persona,
                                task,
                                duration,
@@ -63,88 +134,18 @@ def run_gpt_prompt_task_decomp(persona,
     prompt_input += [persona.scratch.get_str_firstname()]
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    print ("TOODOOOOOO")
-    print (gpt_response)
-    print ("-==- -==- -==- ")
-
-    # TODO SOMETHING HERE sometimes fails... See screenshot
-    temp = [i.strip() for i in gpt_response.split("\n")]
-    _cr = []
-    cr = []
-    for count, i in enumerate(temp):
-      if count != 0:
-        _cr += [" ".join([j.strip () for j in i.split(" ")][3:])]
-      else:
-        _cr += [i]
-    for count, i in enumerate(_cr):
-      k = [j.strip() for j in i.split("(duration in minutes:")]
-      task = k[0]
-      if task[-1] == ".":
-        task = task[:-1]
-      duration = int(k[1].split(",")[0].strip())
-      cr += [[task, duration]]
-
-    total_expected_min = int(prompt.split("(total duration in minutes")[-1]
-                                   .split("):")[0].strip())
-
-    # TODO -- now, you need to make sure that this is the same as the sum of
-    #         the current action sequence.
-    curr_min_slot = [["dummy", -1],] # (task_name, task_index)
-    for count, i in enumerate(cr):
-      i_task = i[0]
-      i_duration = i[1]
-
-      i_duration -= (i_duration % 5)
-      if i_duration > 0:
-        for j in range(i_duration):
-          curr_min_slot += [(i_task, count)]
-    curr_min_slot = curr_min_slot[1:]
-
-    if len(curr_min_slot) > total_expected_min:
-      last_task = curr_min_slot[60]
-      for i in range(1, 6):
-        curr_min_slot[-1 * i] = last_task
-    elif len(curr_min_slot) < total_expected_min:
-      last_task = curr_min_slot[-1]
-      for i in range(total_expected_min - len(curr_min_slot)):
-        curr_min_slot += [last_task]
-
-    cr_ret = [["dummy", -1],]
-    for task, task_index in curr_min_slot:
-      if task != cr_ret[-1][0]:
-        cr_ret += [[task, 1]]
-      else:
-        cr_ret[-1][1] += 1
-    cr = cr_ret[1:]
-
-    return cr
-
-  def __func_validate(gpt_response, prompt=""):
-    # TODO -- this sometimes generates error
-    try:
-      __func_clean_up(gpt_response)
-    except:
-      pass
-      # return False
-    return gpt_response
-
-  def get_fail_safe():
-    fs = ["asleep"]
-    return fs
-
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000,
              "temperature": 0, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
   prompt_template = "persona/prompt_template/v2/task_decomp_v3.txt"
   prompt_input = create_prompt_input(persona, task, duration)
   prompt = generate_prompt(prompt_input, prompt_template)
-  fail_safe = get_fail_safe()
+  fail_safe_val = fail_safe()
 
   print ("?????")
   print (prompt)
-  output = safe_generate_response(prompt, gpt_param, 5, get_fail_safe(),
-                                   __func_validate, __func_clean_up)
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe(),
+                                   validate, clean_up)
 
   # TODO THERE WAS A BUG HERE...
   # This is for preventing overflows...
@@ -193,4 +194,4 @@ def run_gpt_prompt_task_decomp(persona,
     print_run_prompts(prompt_template, persona, gpt_param,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

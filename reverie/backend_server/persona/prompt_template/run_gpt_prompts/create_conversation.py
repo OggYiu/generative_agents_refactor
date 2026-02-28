@@ -1,6 +1,39 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  # print ("???")
+  # print (gpt_response)
+
+
+  gpt_response = (prompt + gpt_response).split("What would they talk about now?")[-1].strip()
+  content = re.findall('"([^"]*)"', gpt_response)
+
+  speaker_order = []
+  for i in gpt_response.split("\n"):
+    name = i.split(":")[0].strip()
+    if name:
+      speaker_order += [name]
+
+  ret = []
+  for count, speaker in enumerate(speaker_order):
+    ret += [[speaker, content[count]]]
+
+  return ret
+
+def validate(gpt_response, prompt=""):
+  try:
+    clean_up(gpt_response, prompt)
+    return True
+  except:
+    return False
+
+def fail_safe(init_persona, target_persona):
+  convo = [[init_persona.name, "Hi!"],
+           [target_persona.name, "Hi!"]]
+  return convo
+
+
 def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
                                        test_input=None, verbose=False):
   def create_prompt_input(init_persona, target_persona, curr_loc,
@@ -77,38 +110,6 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
     prompt_input += [init_persona.name]
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    # print ("???")
-    # print (gpt_response)
-
-
-    gpt_response = (prompt + gpt_response).split("What would they talk about now?")[-1].strip()
-    content = re.findall('"([^"]*)"', gpt_response)
-
-    speaker_order = []
-    for i in gpt_response.split("\n"):
-      name = i.split(":")[0].strip()
-      if name:
-        speaker_order += [name]
-
-    ret = []
-    for count, speaker in enumerate(speaker_order):
-      ret += [[speaker, content[count]]]
-
-    return ret
-
-  def __func_validate(gpt_response, prompt=""):
-    try:
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False
-
-  def get_fail_safe(init_persona, target_persona):
-    convo = [[init_persona.name, "Hi!"],
-             [target_persona.name, "Hi!"]]
-    return convo
-
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000,
                "temperature": 0.7, "top_p": 1, "stream": False,
@@ -118,12 +119,12 @@ def run_gpt_prompt_create_conversation(persona, target_persona, curr_loc,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
 
-  fail_safe = get_fail_safe(persona, target_persona)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  fail_safe_val = fail_safe(persona, target_persona)
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+                                   validate, clean_up)
 
   if debug or verbose:
     print_run_prompts(prompt_template, persona, gpt_param,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

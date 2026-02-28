@@ -2,6 +2,22 @@ from persona.prompt_template.run_gpt_prompts._common import *
 from persona.prompt_template.run_gpt_prompts._helpers import get_random_alphanumeric
 
 
+def clean_up(gpt_response, prompt=""):
+  cr = gpt_response.strip()
+  if cr[-1] == ".":
+    cr = cr[:-1]
+  return cr
+
+def validate(gpt_response, prompt=""):
+  try: clean_up(gpt_response, prompt="")
+  except: return False
+  return True
+
+def fail_safe():
+  fs = "asleep"
+  return fs
+
+
 def run_gpt_prompt_generate_hourly_schedule(persona,
                                             curr_hour_str,
                                             p_f_ds_hourly_org,
@@ -60,21 +76,6 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
 
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    cr = gpt_response.strip()
-    if cr[-1] == ".":
-      cr = cr[:-1]
-    return cr
-
-  def __func_validate(gpt_response, prompt=""):
-    try: __func_clean_up(gpt_response, prompt="")
-    except: return False
-    return True
-
-  def get_fail_safe():
-    fs = "asleep"
-    return fs
-
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 50,
                "temperature": 0.5, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": ["\n"]}
@@ -86,13 +87,13 @@ def run_gpt_prompt_generate_hourly_schedule(persona,
                                      intermission2,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
-  fail_safe = get_fail_safe()
+  fail_safe_val = fail_safe()
 
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+                                   validate, clean_up)
 
   if debug or verbose:
     print_run_prompts(prompt_template, persona, gpt_param,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

@@ -1,6 +1,22 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def validate(gpt_response, prompt=""):
+  try:
+    if gpt_response.split("Answer: Option")[-1].strip().lower() in ["3", "2", "1"]:
+      return True
+    return False
+  except:
+    return False
+
+def clean_up(gpt_response, prompt=""):
+  return gpt_response.split("Answer: Option")[-1].strip().lower()
+
+def fail_safe():
+  fs = "3"
+  return fs
+
+
 def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input=None,
                                        verbose=False):
   def create_prompt_input(init_persona, target_persona, retrieved,
@@ -61,21 +77,6 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
     prompt_input += [init_act_desc]
     return prompt_input
 
-  def __func_validate(gpt_response, prompt=""):
-    try:
-      if gpt_response.split("Answer: Option")[-1].strip().lower() in ["3", "2", "1"]:
-        return True
-      return False
-    except:
-      return False
-
-  def __func_clean_up(gpt_response, prompt=""):
-    return gpt_response.split("Answer: Option")[-1].strip().lower()
-
-  def get_fail_safe():
-    fs = "3"
-    return fs
-
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 20,
                "temperature": 0, "top_p": 1, "stream": False,
@@ -85,12 +86,12 @@ def run_gpt_prompt_decide_to_react(persona, target_persona, retrieved,test_input
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
 
-  fail_safe = get_fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  fail_safe_val = fail_safe()
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+                                   validate, clean_up)
 
   if debug or verbose:
     print_run_prompts(prompt_template, persona, gpt_param,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

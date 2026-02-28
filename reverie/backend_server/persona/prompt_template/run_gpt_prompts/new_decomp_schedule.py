@@ -1,6 +1,74 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  new_schedule = prompt + " " + gpt_response.strip()
+  new_schedule = new_schedule.split("The revised schedule:")[-1].strip()
+  new_schedule = new_schedule.split("\n")
+
+  ret_temp = []
+  for i in new_schedule:
+    ret_temp += [i.split(" -- ")]
+
+  ret = []
+  for time_str, action in ret_temp:
+    start_time = time_str.split(" ~ ")[0].strip()
+    end_time = time_str.split(" ~ ")[1].strip()
+    delta = datetime.datetime.strptime(end_time, "%H:%M") - datetime.datetime.strptime(start_time, "%H:%M")
+    delta_min = int(delta.total_seconds()/60)
+    if delta_min < 0: delta_min = 0
+    ret += [[action, delta_min]]
+
+  return ret
+
+def validate(gpt_response, prompt=""):
+  try:
+    gpt_response = clean_up(gpt_response, prompt)
+    dur_sum = 0
+    for act, dur in gpt_response:
+      dur_sum += dur
+      if str(type(act)) != "<class 'str'>":
+        return False
+      if str(type(dur)) != "<class 'int'>":
+        return False
+    x = prompt.split("\n")[0].split("originally planned schedule from")[-1].strip()[:-1]
+    x = [datetime.datetime.strptime(i.strip(), "%H:%M %p") for i in x.split(" to ")]
+    delta_min = int((x[1] - x[0]).total_seconds()/60)
+
+    if int(dur_sum) != int(delta_min):
+      return False
+
+  except:
+    return False
+  return True
+
+def fail_safe(main_act_dur, truncated_act_dur):
+  dur_sum = 0
+  for act, dur in main_act_dur: dur_sum += dur
+
+  ret = truncated_act_dur[:]
+  ret += main_act_dur[len(ret)-1:]
+
+  # If there are access, we need to trim...
+  ret_dur_sum = 0
+  count = 0
+  over = None
+  for act, dur in ret:
+    ret_dur_sum += dur
+    if ret_dur_sum == dur_sum:
+      break
+    if ret_dur_sum > dur_sum:
+      over = ret_dur_sum - dur_sum
+      break
+    count += 1
+
+  if over:
+    ret = ret[:count+1]
+    ret[-1][1] -= over
+
+  return ret
+
+
 def run_gpt_prompt_new_decomp_schedule(persona,
                                        main_act_dur,
                                        truncated_act_dur,
@@ -53,73 +121,6 @@ def run_gpt_prompt_new_decomp_schedule(persona,
                     new_plan_init]
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    new_schedule = prompt + " " + gpt_response.strip()
-    new_schedule = new_schedule.split("The revised schedule:")[-1].strip()
-    new_schedule = new_schedule.split("\n")
-
-    ret_temp = []
-    for i in new_schedule:
-      ret_temp += [i.split(" -- ")]
-
-    ret = []
-    for time_str, action in ret_temp:
-      start_time = time_str.split(" ~ ")[0].strip()
-      end_time = time_str.split(" ~ ")[1].strip()
-      delta = datetime.datetime.strptime(end_time, "%H:%M") - datetime.datetime.strptime(start_time, "%H:%M")
-      delta_min = int(delta.total_seconds()/60)
-      if delta_min < 0: delta_min = 0
-      ret += [[action, delta_min]]
-
-    return ret
-
-  def __func_validate(gpt_response, prompt=""):
-    try:
-      gpt_response = __func_clean_up(gpt_response, prompt)
-      dur_sum = 0
-      for act, dur in gpt_response:
-        dur_sum += dur
-        if str(type(act)) != "<class 'str'>":
-          return False
-        if str(type(dur)) != "<class 'int'>":
-          return False
-      x = prompt.split("\n")[0].split("originally planned schedule from")[-1].strip()[:-1]
-      x = [datetime.datetime.strptime(i.strip(), "%H:%M %p") for i in x.split(" to ")]
-      delta_min = int((x[1] - x[0]).total_seconds()/60)
-
-      if int(dur_sum) != int(delta_min):
-        return False
-
-    except:
-      return False
-    return True
-
-  def get_fail_safe(main_act_dur, truncated_act_dur):
-    dur_sum = 0
-    for act, dur in main_act_dur: dur_sum += dur
-
-    ret = truncated_act_dur[:]
-    ret += main_act_dur[len(ret)-1:]
-
-    # If there are access, we need to trim...
-    ret_dur_sum = 0
-    count = 0
-    over = None
-    for act, dur in ret:
-      ret_dur_sum += dur
-      if ret_dur_sum == dur_sum:
-        break
-      if ret_dur_sum > dur_sum:
-        over = ret_dur_sum - dur_sum
-        break
-      count += 1
-
-    if over:
-      ret = ret[:count+1]
-      ret[-1][1] -= over
-
-    return ret
-
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000,
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
@@ -133,9 +134,9 @@ def run_gpt_prompt_new_decomp_schedule(persona,
                                      inserted_act_dur,
                                      test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
-  fail_safe = get_fail_safe(main_act_dur, truncated_act_dur)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  fail_safe_val = fail_safe(main_act_dur, truncated_act_dur)
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+                                   validate, clean_up)
 
   # print ("* * * * output")
   # print (output)
@@ -148,4 +149,4 @@ def run_gpt_prompt_new_decomp_schedule(persona,
     print_run_prompts(prompt_template, persona, gpt_param,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

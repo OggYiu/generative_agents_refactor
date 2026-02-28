@@ -1,6 +1,33 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  cr = []
+  _cr = gpt_response.split(")")
+  for i in _cr:
+    if i[-1].isdigit():
+      i = i[:-1].strip()
+      if i[-1] == "." or i[-1] == ",":
+        cr += [i[:-1].strip()]
+  return cr
+
+def validate(gpt_response, prompt=""):
+  try: clean_up(gpt_response, prompt="")
+  except:
+    return False
+  return True
+
+def fail_safe():
+  fs = ['wake up and complete the morning routine at 6:00 am',
+        'eat breakfast at 7:00 am',
+        'read a book from 8:00 am to 12:00 pm',
+        'have lunch at 12:00 pm',
+        'take a nap from 1:00 pm to 4:00 pm',
+        'relax and watch TV from 7:00 pm to 8:00 pm',
+        'go to bed at 11:00 pm']
+  return fs
+
+
 def run_gpt_prompt_daily_plan(persona,
                               wake_up_hour,
                               test_input=None,
@@ -27,32 +54,6 @@ def run_gpt_prompt_daily_plan(persona,
     prompt_input += [f"{str(wake_up_hour)}:00 am"]
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    cr = []
-    _cr = gpt_response.split(")")
-    for i in _cr:
-      if i[-1].isdigit():
-        i = i[:-1].strip()
-        if i[-1] == "." or i[-1] == ",":
-          cr += [i[:-1].strip()]
-    return cr
-
-  def __func_validate(gpt_response, prompt=""):
-    try: __func_clean_up(gpt_response, prompt="")
-    except:
-      return False
-    return True
-
-  def get_fail_safe():
-    fs = ['wake up and complete the morning routine at 6:00 am',
-          'eat breakfast at 7:00 am',
-          'read a book from 8:00 am to 12:00 pm',
-          'have lunch at 12:00 pm',
-          'take a nap from 1:00 pm to 4:00 pm',
-          'relax and watch TV from 7:00 pm to 8:00 pm',
-          'go to bed at 11:00 pm']
-    return fs
-
 
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 500,
@@ -61,10 +62,10 @@ def run_gpt_prompt_daily_plan(persona,
   prompt_template = "persona/prompt_template/v2/daily_planning_v6.txt"
   prompt_input = create_prompt_input(persona, wake_up_hour, test_input)
   prompt = generate_prompt(prompt_input, prompt_template)
-  fail_safe = get_fail_safe()
+  fail_safe_val = fail_safe()
 
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe,
-                                   __func_validate, __func_clean_up)
+  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+                                   validate, clean_up)
   output = ([f"wake up and complete the morning routine at {wake_up_hour}:00 am"]
               + output)
 
@@ -72,4 +73,4 @@ def run_gpt_prompt_daily_plan(persona,
     print_run_prompts(prompt_template, persona, gpt_param,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

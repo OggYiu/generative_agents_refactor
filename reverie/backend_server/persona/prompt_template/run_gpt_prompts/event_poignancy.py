@@ -1,6 +1,32 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  gpt_response = int(gpt_response.strip())
+  return gpt_response
+
+def validate(gpt_response, prompt=""):
+  try:
+    clean_up(gpt_response, prompt)
+    return True
+  except:
+    return False
+
+def fail_safe():
+  return 4
+
+def chat_clean_up(gpt_response, prompt=""):
+  gpt_response = int(gpt_response)
+  return gpt_response
+
+def chat_validate(gpt_response, prompt=""):
+  try:
+    clean_up(gpt_response, prompt)
+    return True
+  except:
+    return False
+
+
 def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, verbose=False):
   def create_prompt_input(persona, event_description, test_input=None):
     prompt_input = [persona.scratch.name,
@@ -8,34 +34,6 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
                     persona.scratch.name,
                     event_description]
     return prompt_input
-
-  def __func_clean_up(gpt_response, prompt=""):
-    gpt_response = int(gpt_response.strip())
-    return gpt_response
-
-  def __func_validate(gpt_response, prompt=""):
-    try:
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False
-
-  def get_fail_safe():
-    return 4
-
-
-
-  # ChatGPT Plugin ===========================================================
-  def __chat_func_clean_up(gpt_response, prompt=""): ############
-    gpt_response = int(gpt_response)
-    return gpt_response
-
-  def __chat_func_validate(gpt_response, prompt=""): ############
-    try:
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False
 
   print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 7") ########
   gpt_param = {"engine": "text-davinci-002", "max_tokens": 15,
@@ -46,9 +44,9 @@ def run_gpt_prompt_event_poignancy(persona, event_description, test_input=None, 
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "5" ########
   special_instruction = "The output should ONLY contain ONE integer value on the scale of 1 to 10." ########
-  fail_safe = get_fail_safe() ########
-  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe,
-                                          __chat_func_validate, __chat_func_clean_up, True)
+  fail_safe_val = fail_safe() ########
+  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe_val,
+                                          chat_validate, chat_clean_up, True)
   if output != False:
-    return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+    return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]
   # ChatGPT Plugin ===========================================================

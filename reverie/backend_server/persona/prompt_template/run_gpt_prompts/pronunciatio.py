@@ -1,6 +1,40 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  cr = gpt_response.strip()
+  if len(cr) > 3:
+    cr = cr[:3]
+  return cr
+
+def validate(gpt_response, prompt=""):
+  try:
+    clean_up(gpt_response, prompt="")
+    if len(gpt_response) == 0:
+      return False
+  except: return False
+  return True
+
+def fail_safe():
+  fs = "\U0001f60b"
+  return fs
+
+def chat_clean_up(gpt_response, prompt=""): ############
+  cr = gpt_response.strip()
+  if len(cr) > 3:
+    cr = cr[:3]
+  return cr
+
+def chat_validate(gpt_response, prompt=""): ############
+  try:
+    clean_up(gpt_response, prompt="")
+    if len(gpt_response) == 0:
+      return False
+  except: return False
+  return True
+  return True
+
+
 def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   def create_prompt_input(action_description):
     if "(" in action_description:
@@ -8,41 +42,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
     prompt_input = [action_description]
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    cr = gpt_response.strip()
-    if len(cr) > 3:
-      cr = cr[:3]
-    return cr
-
-  def __func_validate(gpt_response, prompt=""):
-    try:
-      __func_clean_up(gpt_response, prompt="")
-      if len(gpt_response) == 0:
-        return False
-    except: return False
-    return True
-
-  def get_fail_safe():
-    fs = "\U0001f60b"
-    return fs
-
-
   # ChatGPT Plugin ===========================================================
-  def __chat_func_clean_up(gpt_response, prompt=""): ############
-    cr = gpt_response.strip()
-    if len(cr) > 3:
-      cr = cr[:3]
-    return cr
-
-  def __chat_func_validate(gpt_response, prompt=""): ############
-    try:
-      __func_clean_up(gpt_response, prompt="")
-      if len(gpt_response) == 0:
-        return False
-    except: return False
-    return True
-    return True
-
   print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 4") ########
   gpt_param = {"engine": "text-davinci-002", "max_tokens": 15,
                "temperature": 0, "top_p": 1, "stream": False,
@@ -52,9 +52,9 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = "\U0001f6c1\U0001f9d6\u200d\u2640\ufe0f" ########
   special_instruction = "The value for the output must ONLY contain the emojis." ########
-  fail_safe = get_fail_safe()
-  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe,
-                                          __chat_func_validate, __chat_func_clean_up, True)
+  fail_safe_val = fail_safe()
+  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe_val,
+                                          chat_validate, chat_clean_up, True)
   if output != False:
-    return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+    return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]
   # ChatGPT Plugin ===========================================================

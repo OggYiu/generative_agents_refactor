@@ -2,6 +2,41 @@ from persona.prompt_template.run_gpt_prompts._common import *
 from persona.prompt_template.run_gpt_prompts._helpers import extract_first_json_dict
 
 
+def chat_clean_up(gpt_response, prompt=""):
+  gpt_response = extract_first_json_dict(gpt_response)
+
+  cleaned_dict = dict()
+  cleaned = []
+  for key, val in gpt_response.items():
+    cleaned += [val]
+  cleaned_dict["utterance"] = cleaned[0]
+  cleaned_dict["end"] = True
+  if "f" in str(cleaned[1]) or "F" in str(cleaned[1]):
+    cleaned_dict["end"] = False
+
+  return cleaned_dict
+
+def chat_validate(gpt_response, prompt=""):
+  print ("ugh...")
+  try:
+    # print ("debug 1")
+    # print (gpt_response)
+    # print ("debug 2")
+
+    print (extract_first_json_dict(gpt_response))
+    # print ("debug 3")
+
+    return True
+  except:
+    return False
+
+def fail_safe():
+  cleaned_dict = dict()
+  cleaned_dict["utterance"] = "..."
+  cleaned_dict["end"] = False
+  return cleaned_dict
+
+
 def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retrieved, curr_context, curr_chat, test_input=None, verbose=False):
   def create_prompt_input(maze, init_persona, target_persona, retrieved, curr_context, curr_chat, test_input=None):
     persona = init_persona
@@ -44,52 +79,18 @@ def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retr
       ]
     return prompt_input
 
-  def __chat_func_clean_up(gpt_response, prompt=""):
-    gpt_response = extract_first_json_dict(gpt_response)
-
-    cleaned_dict = dict()
-    cleaned = []
-    for key, val in gpt_response.items():
-      cleaned += [val]
-    cleaned_dict["utterance"] = cleaned[0]
-    cleaned_dict["end"] = True
-    if "f" in str(cleaned[1]) or "F" in str(cleaned[1]):
-      cleaned_dict["end"] = False
-
-    return cleaned_dict
-
-  def __chat_func_validate(gpt_response, prompt=""):
-    print ("ugh...")
-    try:
-      # print ("debug 1")
-      # print (gpt_response)
-      # print ("debug 2")
-
-      print (extract_first_json_dict(gpt_response))
-      # print ("debug 3")
-
-      return True
-    except:
-      return False
-
-  def get_fail_safe():
-    cleaned_dict = dict()
-    cleaned_dict["utterance"] = "..."
-    cleaned_dict["end"] = False
-    return cleaned_dict
-
   print ("11")
   prompt_template = "persona/prompt_template/v3_ChatGPT/iterative_convo_v1.txt"
   prompt_input = create_prompt_input(maze, init_persona, target_persona, retrieved, curr_context, curr_chat)
   print ("22")
   prompt = generate_prompt(prompt_input, prompt_template)
   print (prompt)
-  fail_safe = get_fail_safe()
-  output = ChatGPT_safe_generate_response_OLD(prompt, 3, fail_safe,
-                        __chat_func_validate, __chat_func_clean_up, verbose)
+  fail_safe_val = fail_safe()
+  output = ChatGPT_safe_generate_response_OLD(prompt, 3, fail_safe_val,
+                        chat_validate, chat_clean_up, verbose)
   print (output)
 
   gpt_param = {"engine": "text-davinci-003", "max_tokens": 50,
                "temperature": 0, "top_p": 1, "stream": False,
                "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]

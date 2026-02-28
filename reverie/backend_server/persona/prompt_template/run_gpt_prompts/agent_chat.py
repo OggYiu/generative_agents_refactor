@@ -1,6 +1,47 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 
+def clean_up(gpt_response, prompt=""):
+  print (gpt_response)
+
+  gpt_response = (prompt + gpt_response).split("Here is their conversation.")[-1].strip()
+  content = re.findall('"([^"]*)"', gpt_response)
+
+  speaker_order = []
+  for i in gpt_response.split("\n"):
+    name = i.split(":")[0].strip()
+    if name:
+      speaker_order += [name]
+
+  ret = []
+  for count, speaker in enumerate(speaker_order):
+    ret += [[speaker, content[count]]]
+
+  return ret
+
+def validate(gpt_response, prompt=""):
+  try:
+    clean_up(gpt_response, prompt)
+    return True
+  except:
+    return False
+
+def fail_safe():
+  return "..."
+
+def chat_clean_up(gpt_response, prompt=""):
+  # ret = ast.literal_eval(gpt_response)
+
+  print ("a;dnfdap98fh4p9enf HEREE!!!")
+  for row in gpt_response:
+    print (row)
+
+  return gpt_response
+
+def chat_validate(gpt_response, prompt=""):
+  return True
+
+
 def run_gpt_prompt_agent_chat(maze, persona, target_persona,
                                curr_context,
                                init_summ_idea,
@@ -44,53 +85,6 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
                     persona.scratch.name]
     return prompt_input
 
-  def __func_clean_up(gpt_response, prompt=""):
-    print (gpt_response)
-
-    gpt_response = (prompt + gpt_response).split("Here is their conversation.")[-1].strip()
-    content = re.findall('"([^"]*)"', gpt_response)
-
-    speaker_order = []
-    for i in gpt_response.split("\n"):
-      name = i.split(":")[0].strip()
-      if name:
-        speaker_order += [name]
-
-    ret = []
-    for count, speaker in enumerate(speaker_order):
-      ret += [[speaker, content[count]]]
-
-    return ret
-
-
-
-  def __func_validate(gpt_response, prompt=""):
-    try:
-      __func_clean_up(gpt_response, prompt)
-      return True
-    except:
-      return False
-
-  def get_fail_safe():
-    return "..."
-
-
-
-
-  # ChatGPT Plugin ===========================================================
-  def __chat_func_clean_up(gpt_response, prompt=""): ############
-    # ret = ast.literal_eval(gpt_response)
-
-    print ("a;dnfdap98fh4p9enf HEREE!!!")
-    for row in gpt_response:
-      print (row)
-
-    return gpt_response
-
-  def __chat_func_validate(gpt_response, prompt=""): ############
-    return True
-
-
   # print ("HERE JULY 23 -- ----- ") ########
   gpt_param = {"engine": "text-davinci-002", "max_tokens": 15,
                "temperature": 0, "top_p": 1, "stream": False,
@@ -100,10 +94,10 @@ def run_gpt_prompt_agent_chat(maze, persona, target_persona,
   prompt = generate_prompt(prompt_input, prompt_template)
   example_output = '[["Jane Doe", "Hi!"], ["John Doe", "Hello there!"] ... ]' ########
   special_instruction = 'The output should be a list of list where the inner lists are in the form of ["<Name>", "<Utterance>"].' ########
-  fail_safe = get_fail_safe() ########
-  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe,
-                                          __chat_func_validate, __chat_func_clean_up, True)
+  fail_safe_val = fail_safe() ########
+  output = ChatGPT_safe_generate_response(prompt, example_output, special_instruction, 3, fail_safe_val,
+                                          chat_validate, chat_clean_up, True)
   # print ("HERE END JULY 23 -- ----- ") ########
   if output != False:
-    return output, [output, prompt, gpt_param, prompt_input, fail_safe]
+    return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]
   # ChatGPT Plugin ===========================================================
