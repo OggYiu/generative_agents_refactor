@@ -1,5 +1,70 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
+GPT_PARAM = {"engine": "text-davinci-003", "max_tokens": 1000,
+             "temperature": 0, "top_p": 1, "stream": False,
+             "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+PROMPT_TEMPLATE = "persona/prompt_template/v2/task_decomp_v3.txt"
+REPEAT = 5
+LLM_CALL_TYPE = "completion"
+
+
+def create_prompt_input(persona, task, duration, test_input=None):
+
+  """
+  Today is Saturday June 25. From 00:00 ~ 06:00am, Maeve is
+  planning on sleeping, 06:00 ~ 07:00am, Maeve is
+  planning on waking up and doing her morning routine,
+  and from 07:00am ~08:00am, Maeve is planning on having breakfast.
+  """
+
+  curr_f_org_index = persona.scratch.get_f_daily_schedule_hourly_org_index()
+  all_indices = []
+  # if curr_f_org_index > 0:
+  #   all_indices += [curr_f_org_index-1]
+  all_indices += [curr_f_org_index]
+  if curr_f_org_index+1 <= len(persona.scratch.f_daily_schedule_hourly_org):
+    all_indices += [curr_f_org_index+1]
+  if curr_f_org_index+2 <= len(persona.scratch.f_daily_schedule_hourly_org):
+    all_indices += [curr_f_org_index+2]
+
+  curr_time_range = ""
+
+  print ("DEBUG")
+  print (persona.scratch.f_daily_schedule_hourly_org)
+  print (all_indices)
+
+  summ_str = f'Today is {persona.scratch.curr_time.strftime("%B %d, %Y")}. '
+  summ_str += f'From '
+  for index in all_indices:
+    print ("index", index)
+    if index < len(persona.scratch.f_daily_schedule_hourly_org):
+      start_min = 0
+      for i in range(index):
+        start_min += persona.scratch.f_daily_schedule_hourly_org[i][1]
+      end_min = start_min + persona.scratch.f_daily_schedule_hourly_org[index][1]
+      start_time = (datetime.datetime.strptime("00:00:00", "%H:%M:%S")
+                    + datetime.timedelta(minutes=start_min))
+      end_time = (datetime.datetime.strptime("00:00:00", "%H:%M:%S")
+                    + datetime.timedelta(minutes=end_min))
+      start_time_str = start_time.strftime("%H:%M%p")
+      end_time_str = end_time.strftime("%H:%M%p")
+      summ_str += f"{start_time_str} ~ {end_time_str}, {persona.name} is planning on {persona.scratch.f_daily_schedule_hourly_org[index][0]}, "
+      if curr_f_org_index+1 == index:
+        curr_time_range = f'{start_time_str} ~ {end_time_str}'
+  summ_str = summ_str[:-2] + "."
+
+  prompt_input = []
+  prompt_input += [persona.scratch.get_str_iss()]
+  prompt_input += [summ_str]
+  # prompt_input += [persona.scratch.get_str_curr_date_str()]
+  prompt_input += [persona.scratch.get_str_firstname()]
+  prompt_input += [persona.scratch.get_str_firstname()]
+  prompt_input += [task]
+  prompt_input += [curr_time_range]
+  prompt_input += [duration]
+  prompt_input += [persona.scratch.get_str_firstname()]
+  return prompt_input
+
 
 def clean_up(gpt_response, prompt=""):
   print ("TOODOOOOOO")
@@ -77,74 +142,17 @@ def run_gpt_prompt_task_decomp(persona,
                                duration,
                                test_input=None,
                                verbose=False):
-  def create_prompt_input(persona, task, duration, test_input=None):
+  from persona.prompt_template.gpt_structure import generate_prompt, safe_generate_response
+  from persona.prompt_template.print_prompt import print_run_prompts
+  from utils import debug
 
-    """
-    Today is Saturday June 25. From 00:00 ~ 06:00am, Maeve is
-    planning on sleeping, 06:00 ~ 07:00am, Maeve is
-    planning on waking up and doing her morning routine,
-    and from 07:00am ~08:00am, Maeve is planning on having breakfast.
-    """
-
-    curr_f_org_index = persona.scratch.get_f_daily_schedule_hourly_org_index()
-    all_indices = []
-    # if curr_f_org_index > 0:
-    #   all_indices += [curr_f_org_index-1]
-    all_indices += [curr_f_org_index]
-    if curr_f_org_index+1 <= len(persona.scratch.f_daily_schedule_hourly_org):
-      all_indices += [curr_f_org_index+1]
-    if curr_f_org_index+2 <= len(persona.scratch.f_daily_schedule_hourly_org):
-      all_indices += [curr_f_org_index+2]
-
-    curr_time_range = ""
-
-    print ("DEBUG")
-    print (persona.scratch.f_daily_schedule_hourly_org)
-    print (all_indices)
-
-    summ_str = f'Today is {persona.scratch.curr_time.strftime("%B %d, %Y")}. '
-    summ_str += f'From '
-    for index in all_indices:
-      print ("index", index)
-      if index < len(persona.scratch.f_daily_schedule_hourly_org):
-        start_min = 0
-        for i in range(index):
-          start_min += persona.scratch.f_daily_schedule_hourly_org[i][1]
-        end_min = start_min + persona.scratch.f_daily_schedule_hourly_org[index][1]
-        start_time = (datetime.datetime.strptime("00:00:00", "%H:%M:%S")
-                      + datetime.timedelta(minutes=start_min))
-        end_time = (datetime.datetime.strptime("00:00:00", "%H:%M:%S")
-                      + datetime.timedelta(minutes=end_min))
-        start_time_str = start_time.strftime("%H:%M%p")
-        end_time_str = end_time.strftime("%H:%M%p")
-        summ_str += f"{start_time_str} ~ {end_time_str}, {persona.name} is planning on {persona.scratch.f_daily_schedule_hourly_org[index][0]}, "
-        if curr_f_org_index+1 == index:
-          curr_time_range = f'{start_time_str} ~ {end_time_str}'
-    summ_str = summ_str[:-2] + "."
-
-    prompt_input = []
-    prompt_input += [persona.scratch.get_str_iss()]
-    prompt_input += [summ_str]
-    # prompt_input += [persona.scratch.get_str_curr_date_str()]
-    prompt_input += [persona.scratch.get_str_firstname()]
-    prompt_input += [persona.scratch.get_str_firstname()]
-    prompt_input += [task]
-    prompt_input += [curr_time_range]
-    prompt_input += [duration]
-    prompt_input += [persona.scratch.get_str_firstname()]
-    return prompt_input
-
-  gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000,
-             "temperature": 0, "top_p": 1, "stream": False,
-             "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/task_decomp_v3.txt"
   prompt_input = create_prompt_input(persona, task, duration)
-  prompt = generate_prompt(prompt_input, prompt_template)
+  prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe()
 
   print ("?????")
   print (prompt)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe(),
+  output = safe_generate_response(prompt, GPT_PARAM, REPEAT, fail_safe(),
                                    validate, clean_up)
 
   # TODO THERE WAS A BUG HERE...
@@ -191,7 +199,7 @@ def run_gpt_prompt_task_decomp(persona,
 
 
   if debug or verbose:
-    print_run_prompts(prompt_template, persona, gpt_param,
+    print_run_prompts(PROMPT_TEMPLATE, persona, GPT_PARAM,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]
+  return output, [output, prompt, GPT_PARAM, prompt_input, fail_safe_val]

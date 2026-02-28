@@ -1,5 +1,56 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
+GPT_PARAM = {"engine": "text-davinci-003", "max_tokens": 1000,
+             "temperature": 0, "top_p": 1, "stream": False,
+             "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+PROMPT_TEMPLATE = "persona/prompt_template/v2/new_decomp_schedule_v1.txt"
+REPEAT = 5
+LLM_CALL_TYPE = "completion"
+
+
+def create_prompt_input(persona,
+                         main_act_dur,
+                         truncated_act_dur,
+                         start_time_hour,
+                         end_time_hour,
+                         inserted_act,
+                         inserted_act_dur,
+                         test_input=None):
+  persona_name = persona.name
+  start_hour_str = start_time_hour.strftime("%H:%M %p")
+  end_hour_str = end_time_hour.strftime("%H:%M %p")
+
+  original_plan = ""
+  for_time = start_time_hour
+  for i in main_act_dur:
+    original_plan += f'{for_time.strftime("%H:%M")} ~ {(for_time + datetime.timedelta(minutes=int(i[1]))).strftime("%H:%M")} -- ' + i[0]
+    original_plan += "\n"
+    for_time += datetime.timedelta(minutes=int(i[1]))
+
+  new_plan_init = ""
+  for_time = start_time_hour
+  for count, i in enumerate(truncated_act_dur):
+    new_plan_init += f'{for_time.strftime("%H:%M")} ~ {(for_time + datetime.timedelta(minutes=int(i[1]))).strftime("%H:%M")} -- ' + i[0]
+    new_plan_init += "\n"
+    if count < len(truncated_act_dur) - 1:
+      for_time += datetime.timedelta(minutes=int(i[1]))
+
+  new_plan_init += (for_time + datetime.timedelta(minutes=int(i[1]))).strftime("%H:%M") + " ~"
+
+  prompt_input = [persona_name,
+                  start_hour_str,
+                  end_hour_str,
+                  original_plan,
+                  persona_name,
+                  inserted_act,
+                  inserted_act_dur,
+                  persona_name,
+                  start_hour_str,
+                  end_hour_str,
+                  end_hour_str,
+                  new_plan_init]
+  return prompt_input
+
 
 def clean_up(gpt_response, prompt=""):
   new_schedule = prompt + " " + gpt_response.strip()
@@ -78,53 +129,10 @@ def run_gpt_prompt_new_decomp_schedule(persona,
                                        inserted_act_dur,
                                        test_input=None,
                                        verbose=False):
-  def create_prompt_input(persona,
-                           main_act_dur,
-                           truncated_act_dur,
-                           start_time_hour,
-                           end_time_hour,
-                           inserted_act,
-                           inserted_act_dur,
-                           test_input=None):
-    persona_name = persona.name
-    start_hour_str = start_time_hour.strftime("%H:%M %p")
-    end_hour_str = end_time_hour.strftime("%H:%M %p")
+  from persona.prompt_template.gpt_structure import generate_prompt, safe_generate_response
+  from persona.prompt_template.print_prompt import print_run_prompts
+  from utils import debug
 
-    original_plan = ""
-    for_time = start_time_hour
-    for i in main_act_dur:
-      original_plan += f'{for_time.strftime("%H:%M")} ~ {(for_time + datetime.timedelta(minutes=int(i[1]))).strftime("%H:%M")} -- ' + i[0]
-      original_plan += "\n"
-      for_time += datetime.timedelta(minutes=int(i[1]))
-
-    new_plan_init = ""
-    for_time = start_time_hour
-    for count, i in enumerate(truncated_act_dur):
-      new_plan_init += f'{for_time.strftime("%H:%M")} ~ {(for_time + datetime.timedelta(minutes=int(i[1]))).strftime("%H:%M")} -- ' + i[0]
-      new_plan_init += "\n"
-      if count < len(truncated_act_dur) - 1:
-        for_time += datetime.timedelta(minutes=int(i[1]))
-
-    new_plan_init += (for_time + datetime.timedelta(minutes=int(i[1]))).strftime("%H:%M") + " ~"
-
-    prompt_input = [persona_name,
-                    start_hour_str,
-                    end_hour_str,
-                    original_plan,
-                    persona_name,
-                    inserted_act,
-                    inserted_act_dur,
-                    persona_name,
-                    start_hour_str,
-                    end_hour_str,
-                    end_hour_str,
-                    new_plan_init]
-    return prompt_input
-
-  gpt_param = {"engine": "text-davinci-003", "max_tokens": 1000,
-               "temperature": 0, "top_p": 1, "stream": False,
-               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/new_decomp_schedule_v1.txt"
   prompt_input = create_prompt_input(persona,
                                      main_act_dur,
                                      truncated_act_dur,
@@ -133,9 +141,9 @@ def run_gpt_prompt_new_decomp_schedule(persona,
                                      inserted_act,
                                      inserted_act_dur,
                                      test_input)
-  prompt = generate_prompt(prompt_input, prompt_template)
+  prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe(main_act_dur, truncated_act_dur)
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+  output = safe_generate_response(prompt, GPT_PARAM, REPEAT, fail_safe_val,
                                    validate, clean_up)
 
   # print ("* * * * output")
@@ -146,7 +154,7 @@ def run_gpt_prompt_new_decomp_schedule(persona,
 
 
   if debug or verbose:
-    print_run_prompts(prompt_template, persona, gpt_param,
+    print_run_prompts(PROMPT_TEMPLATE, persona, GPT_PARAM,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]
+  return output, [output, prompt, GPT_PARAM, prompt_input, fail_safe_val]

@@ -1,5 +1,24 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
+GPT_PARAM = {"engine": "text-davinci-003", "max_tokens": 40,
+             "temperature": 0.7, "top_p": 1, "stream": False,
+             "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
+PROMPT_TEMPLATE = "persona/prompt_template/v2/convo_to_thoughts_v1.txt"
+REPEAT = 5
+LLM_CALL_TYPE = "completion"
+
+
+def create_prompt_input(init_persona_name,
+                                  target_persona_name,
+                                  convo_str,
+                                  fin_target, test_input=None):
+  prompt_input = [init_persona_name,
+                  target_persona_name,
+                  convo_str,
+                  init_persona_name,
+                  fin_target]
+  return prompt_input
+
 
 def clean_up(gpt_response, prompt=""):
   gpt_response = gpt_response.strip()
@@ -21,33 +40,22 @@ def run_gpt_prompt_convo_to_thoughts(persona,
                                     target_persona_name,
                                     convo_str,
                                     fin_target, test_input=None, verbose=False):
-  def create_prompt_input(init_persona_name,
-                                    target_persona_name,
-                                    convo_str,
-                                    fin_target, test_input=None):
-    prompt_input = [init_persona_name,
-                    target_persona_name,
-                    convo_str,
-                    init_persona_name,
-                    fin_target]
-    return prompt_input
+  from persona.prompt_template.gpt_structure import generate_prompt, safe_generate_response
+  from persona.prompt_template.print_prompt import print_run_prompts
+  from utils import debug
 
-  gpt_param = {"engine": "text-davinci-003", "max_tokens": 40,
-               "temperature": 0.7, "top_p": 1, "stream": False,
-               "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-  prompt_template = "persona/prompt_template/v2/convo_to_thoughts_v1.txt"
   prompt_input = create_prompt_input(init_persona_name,
                                     target_persona_name,
                                     convo_str,
                                     fin_target)
-  prompt = generate_prompt(prompt_input, prompt_template)
+  prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
 
   fail_safe_val = fail_safe()
-  output = safe_generate_response(prompt, gpt_param, 5, fail_safe_val,
+  output = safe_generate_response(prompt, GPT_PARAM, REPEAT, fail_safe_val,
                                    validate, clean_up)
 
   if debug or verbose:
-    print_run_prompts(prompt_template, persona, gpt_param,
+    print_run_prompts(PROMPT_TEMPLATE, persona, GPT_PARAM,
                       prompt_input, prompt, output)
 
-  return output, [output, prompt, gpt_param, prompt_input, fail_safe_val]
+  return output, [output, prompt, GPT_PARAM, prompt_input, fail_safe_val]
