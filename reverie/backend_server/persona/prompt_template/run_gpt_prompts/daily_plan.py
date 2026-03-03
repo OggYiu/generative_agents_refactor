@@ -1,9 +1,9 @@
 from persona.prompt_template.run_gpt_prompts._common import *
 
 GPT_PARAM = {"engine": "text-davinci-003", "max_tokens": 500,
-             "temperature": 1, "top_p": 1, "stream": False,
+             "temperature": 0.5, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-PROMPT_TEMPLATE = "persona/prompt_template/v2/daily_planning_v6.txt"
+PROMPT_TEMPLATE = "persona/prompt_template/v2/daily_planning_v7.txt"
 REPEAT = 5
 LLM_CALL_TYPE = "completion"
 
@@ -23,17 +23,23 @@ def clean_up(gpt_response, prompt=""):
   cr = []
   _cr = gpt_response.split(")")
   for i in _cr:
-    if i[-1].isdigit():
+    if i[-1:].isdigit():  # [-1:] is safe on empty strings
       i = i[:-1].strip()
-      if i[-1] == "." or i[-1] == ",":
+      if i and (i[-1] == "." or i[-1] == ","):
         cr += [i[:-1].strip()]
+    elif cr:
+      # Last item: no trailing digit, must end with a period
+      i = i.strip()
+      if i.endswith("."):
+        cr += [i[:-1]]
   return cr
 
 def validate(gpt_response, prompt=""):
-  try: clean_up(gpt_response, prompt="")
+  try:
+    result = clean_up(gpt_response, prompt="")
+    return len(result) > 0
   except:
     return False
-  return True
 
 def fail_safe():
   fs = ['wake up and complete the morning routine at 6:00 am',

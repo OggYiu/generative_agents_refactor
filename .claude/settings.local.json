@@ -18,7 +18,11 @@
       "Bash(git push:*)",
       "Bash(do echo:*)",
       "Bash(find:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(xargs grep:*)",
+      "WebSearch",
+      "Bash(ollama list:*)",
+      "Bash(git status:*)"
     ]
   }
 }

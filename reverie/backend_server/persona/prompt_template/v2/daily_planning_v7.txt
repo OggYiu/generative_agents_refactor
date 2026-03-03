@@ -1,0 +1,18 @@
+daily_planning_v7.txt
+
+Variables:
+!<INPUT 0>! -- Commonset
+!<INPUT 1>! -- Lifestyle
+!<INPUT 2>! -- Reverie date time now
+!<INPUT 3>! -- Persona first names
+!<INPUT 4>! -- wake_up_hour
+
+<commentblockmarker>###</commentblockmarker>
+!<INPUT 0>!
+
+In general, !<INPUT 1>!
+Today is !<INPUT 2>!. Plan !<INPUT 3>!'s day today in broad strokes, with the time of day for each activity (e.g. "have lunch at 12:00 pm", "watch TV from 7:00 pm to 8:00 pm").
+
+Item 1 is already decided: 1) wake up and complete the morning routine at !<INPUT 4>!
+
+Continue the numbered list from item 2 onward. Include 5 to 7 activities that cover the rest of the day until bedtime. Each activity must include a specific time or time range. Strictly respect the times stated in the daily plan requirement (e.g. opening and closing hours). Format each item ending with a comma, except the very last item which must end with a period. Output only the numbered list starting at "2)", nothing else.
