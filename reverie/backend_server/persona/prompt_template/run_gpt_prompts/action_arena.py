@@ -91,7 +91,6 @@ def run_gpt_prompt_action_arena(action_description,
   fail_safe_val = fail_safe()
   output = safe_generate_response(prompt, GPT_PARAM, REPEAT, fail_safe_val,
                                    validate, clean_up)
-  print (output)
   # y = f"{act_world}:{act_sector}"
   # x = [i.strip() for i in persona.s_mem.get_str_accessible_sector_arenas(y).split(",")]
   # if output not in x:

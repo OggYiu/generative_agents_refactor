@@ -16,8 +16,6 @@ def create_prompt_input(description, test_input=None):
 
 
 def clean_up(gpt_response, prompt=""):
-  print ("???")
-  print (gpt_response)
   gpt_response = gpt_response.strip().split("Emotive keywords:")
   factual = [i.strip() for i in gpt_response[0].split(",")]
   emotive = [i.strip() for i in gpt_response[1].split(",")]
@@ -29,7 +27,6 @@ def clean_up(gpt_response, prompt=""):
       if i[-1] == ".":
         i = i[:-1]
       ret += [i]
-  print (ret)
   return set(ret)
 
 def validate(gpt_response, prompt=""):

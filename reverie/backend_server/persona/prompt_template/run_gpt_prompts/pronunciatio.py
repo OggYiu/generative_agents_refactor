@@ -54,9 +54,7 @@ def chat_validate(gpt_response, prompt=""): ############
 def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
   from persona.prompt_template.gpt_structure import generate_prompt, ChatGPT_safe_generate_response
 
-  # ChatGPT Plugin ===========================================================
-  print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 4") ########
-  prompt_input = create_prompt_input(action_description)  ########
+  prompt_input = create_prompt_input(action_description)
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe()
   output = ChatGPT_safe_generate_response(prompt, EXAMPLE_OUTPUT, SPECIAL_INSTRUCTION, REPEAT, fail_safe_val,

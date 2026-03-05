@@ -1,0 +1,8 @@
+waking up and stretching in bed. (duration in minutes: 5, minutes left: 55)
+2) Isabella is making her bed. (duration in minutes: 5, minutes left: 50)
+3) Isabella is brushing her teeth and washing her face. (duration in minutes: 10, minutes left: 40)
+4) Isabella is doing a quick skincare routine. (duration in minutes: 5, minutes left: 35)
+5) Isabella is getting dressed for the day. (duration in minutes: 10, minutes left: 25)
+6) Isabella is brewing a cup of coffee. (duration in minutes: 5, minutes left: 20)
+7) Isabella is having a light breakfast. (duration in minutes: 15, minutes left: 5)
+8) Isabella is reviewing her to-do list for the day. (duration in minutes: 5, minutes left: 0)

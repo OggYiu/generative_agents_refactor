@@ -149,7 +149,7 @@ def test_llm_prompt_against_golden(eval_case):
 
     # --- Layer 1: validate() ---
     # This is the same check the real code does before accepting a response.
-    is_valid = mod.validate(response)
+    is_valid = mod.validate(response, prompt=raw_prompt)
     print(f"validate() passed: {is_valid}")
 
     if not is_valid:
@@ -169,7 +169,8 @@ def test_llm_prompt_against_golden(eval_case):
         )
 
     # --- Layer 2: clean_up + comparison ---
-    cleaned = mod.clean_up(response)
+    # Pass the prompt so modules like task_decomp can extract context from it
+    cleaned = mod.clean_up(response, prompt=raw_prompt)
     print(f"After clean_up: {cleaned!r}")
 
     if config["golden_type"] == "int":
@@ -192,6 +193,24 @@ def test_llm_prompt_against_golden(eval_case):
             assert overlap >= 0.5, (
                 f"Low keyword overlap ({overlap:.0%}). "
                 f"Expected: {golden!r}, Got: {cleaned!r}"
+            )
+
+    elif config["golden_type"] == "raw":
+        # Compare the raw LLM response directly against golden (no clean_up).
+        # Used when the meaningful ground truth is the model's output format
+        # itself (e.g. task_decomp), not the parsed structure.
+        raw_lower = response.lower().strip()
+        golden_lower = str(golden).lower().strip()
+        if golden_lower == raw_lower:
+            print("RESULT: EXACT MATCH")
+        elif golden_lower in raw_lower or raw_lower in golden_lower:
+            print("RESULT: PASS — substring match")
+        else:
+            overlap = _keyword_overlap(golden_lower, raw_lower)
+            print(f"RESULT: keyword overlap = {overlap:.0%}")
+            assert overlap >= 0.5, (
+                f"Low keyword overlap ({overlap:.0%}). "
+                f"Expected: {golden!r}, Got: {response!r}"
             )
 
     elif config["golden_type"] == "list":

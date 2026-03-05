@@ -25,7 +25,7 @@ EVAL_CASES = {
             "stop": ["\n"],
         },
     },
-    "generate_hourly_schedule_01": {
+    "generate_hourly_schedule_06am": {
         "module": "persona.prompt_template.run_gpt_prompts.generate_hourly_schedule",
         "prompt_file": "generate_hourly_schedule_01_prompt.txt",
         "golden_file": "generate_hourly_schedule_01_golden.txt",
@@ -39,6 +39,38 @@ EVAL_CASES = {
             "frequency_penalty": 0,
             "presence_penalty": 0,
             "stop": ["\n"],
+        },
+    },
+    "generate_hourly_schedule_11pm": {
+        "module": "persona.prompt_template.run_gpt_prompts.generate_hourly_schedule",
+        "prompt_file": "generate_hourly_schedule_11pm_prompt.txt",
+        "golden_file": "generate_hourly_schedule_11pm_golden.txt",
+        "golden_type": "str",
+        "gpt_param": {
+            "engine": "text-davinci-003",
+            "max_tokens": 50,
+            "temperature": 0.5,
+            "top_p": 1,
+            "stream": False,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "stop": ["\n"],
+        },
+    },
+    "generate_task_decomp": {
+        "module": "persona.prompt_template.run_gpt_prompts.task_decomp",
+        "prompt_file": "generate_task_decomp_prompt.txt",
+        "golden_file": "generate_task_decomp_golden.txt",
+        "golden_type": "raw",
+        "gpt_param": {
+            "engine": "text-davinci-003",
+            "max_tokens": 1000,
+            "temperature": 0,
+            "top_p": 1,
+            "stream": False,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "stop": None,
         },
     },
     "generate_first_daily_plan": {

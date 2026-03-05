@@ -24,15 +24,8 @@ def chat_clean_up(gpt_response, prompt=""):
   return cleaned_dict
 
 def chat_validate(gpt_response, prompt=""):
-  print ("ugh...")
   try:
-    # print ("debug 1")
-    # print (gpt_response)
-    # print ("debug 2")
-
-    print (extract_first_json_dict(gpt_response))
-    # print ("debug 3")
-
+    extract_first_json_dict(gpt_response)
     return True
   except:
     return False
@@ -58,8 +51,6 @@ def create_prompt_input(maze, init_persona, target_persona, retrieved, curr_cont
   if persona.a_mem.seq_chat:
     if int((persona.scratch.curr_time - persona.a_mem.seq_chat[-1].created).total_seconds()/60) > 480:
       prev_convo_insert = ""
-  print (prev_convo_insert)
-
   curr_sector = f"{maze.access_tile(persona.scratch.curr_tile)['sector']}"
   curr_arena= f"{maze.access_tile(persona.scratch.curr_tile)['arena']}"
   curr_location = f"{curr_arena} in {curr_sector}"
@@ -92,14 +83,10 @@ def run_gpt_generate_iterative_chat_utt(maze, init_persona, target_persona, retr
     generate_prompt,
   )
 
-  print ("11")
   prompt_input = create_prompt_input(maze, init_persona, target_persona, retrieved, curr_context, curr_chat)
-  print ("22")
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
-  print (prompt)
   fail_safe_val = fail_safe()
   output = ChatGPT_safe_generate_response_OLD(prompt, REPEAT, fail_safe_val,
                         chat_validate, chat_clean_up, verbose)
-  print (output)
 
   return output, [output, prompt, GPT_PARAM, prompt_input, fail_safe_val]

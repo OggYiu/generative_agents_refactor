@@ -106,7 +106,7 @@ class TestWakeUpHourCleanUp:
 class TestHourlyScheduleCleanUp:
     """generate_hourly_schedule: clean_up should strip and remove trailing period."""
 
-    golden = _read_eval_file(EVAL_CASES["generate_hourly_schedule_01"]["golden_file"])
+    golden = _read_eval_file(EVAL_CASES["generate_hourly_schedule_06am"]["golden_file"])
 
     def test_exact_golden(self):
         assert hourly_clean(self.golden) == self.golden

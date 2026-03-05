@@ -59,9 +59,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
   from persona.prompt_template.print_prompt import print_run_prompts
   from utils import debug
 
-  # ChatGPT Plugin ===========================================================
-  print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 12") ########
-  prompt_input = create_prompt_input(persona, statements, n)  ########
+  prompt_input = create_prompt_input(persona, statements, n)
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe(n) ########
   output = ChatGPT_safe_generate_response(prompt, EXAMPLE_OUTPUT, SPECIAL_INSTRUCTION, REPEAT, fail_safe_val,

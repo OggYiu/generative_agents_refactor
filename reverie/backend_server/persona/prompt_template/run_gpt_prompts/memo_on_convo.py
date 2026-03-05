@@ -54,9 +54,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
   from persona.prompt_template.print_prompt import print_run_prompts
   from utils import debug
 
-  # ChatGPT Plugin ===========================================================
-  print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 15") ########
-  prompt_input = create_prompt_input(persona, all_utt)  ########
+  prompt_input = create_prompt_input(persona, all_utt)
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe() ########
   output = ChatGPT_safe_generate_response(prompt, EXAMPLE_OUTPUT, SPECIAL_INSTRUCTION, REPEAT, fail_safe_val,

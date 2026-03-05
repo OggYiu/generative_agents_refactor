@@ -43,8 +43,7 @@ def create_prompt_input(persona, target_persona, statements, curr_context, test_
 def run_gpt_prompt_agent_chat_summarize_ideas(persona, target_persona, statements, curr_context, test_input=None, verbose=False):
   from persona.prompt_template.gpt_structure import generate_prompt, ChatGPT_safe_generate_response
 
-  print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 17") ########
-  prompt_input = create_prompt_input(persona, target_persona, statements, curr_context)  ########
+  prompt_input = create_prompt_input(persona, target_persona, statements, curr_context)
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe() ########
   output = ChatGPT_safe_generate_response(prompt, EXAMPLE_OUTPUT, SPECIAL_INSTRUCTION, REPEAT, fail_safe_val,

@@ -3,7 +3,7 @@ from persona.prompt_template.run_gpt_prompts._common import *
 GPT_PARAM = {"engine": "text-davinci-003", "max_tokens": 1000,
              "temperature": 0, "top_p": 1, "stream": False,
              "frequency_penalty": 0, "presence_penalty": 0, "stop": None}
-PROMPT_TEMPLATE = "persona/prompt_template/v2/task_decomp_v3.txt"
+PROMPT_TEMPLATE = "persona/prompt_template/v2/task_decomp_v4.txt"
 REPEAT = 5
 LLM_CALL_TYPE = "completion"
 
@@ -29,14 +29,9 @@ def create_prompt_input(persona, task, duration, test_input=None):
 
   curr_time_range = ""
 
-  print ("DEBUG")
-  print (persona.scratch.f_daily_schedule_hourly_org)
-  print (all_indices)
-
   summ_str = f'Today is {persona.scratch.curr_time.strftime("%B %d, %Y")}. '
   summ_str += f'From '
   for index in all_indices:
-    print ("index", index)
     if index < len(persona.scratch.f_daily_schedule_hourly_org):
       start_min = 0
       for i in range(index):
@@ -67,19 +62,12 @@ def create_prompt_input(persona, task, duration, test_input=None):
 
 
 def clean_up(gpt_response, prompt=""):
-  print ("TOODOOOOOO")
-  print (gpt_response)
-  print ("-==- -==- -==- ")
-
-  # TODO SOMETHING HERE sometimes fails... See screenshot
-  temp = [i.strip() for i in gpt_response.split("\n")]
+  # v4: all items include "N) Name is" prefix, strip first 3 words uniformly
+  temp = [i.strip() for i in gpt_response.split("\n") if i.strip()]
   _cr = []
   cr = []
-  for count, i in enumerate(temp):
-    if count != 0:
-      _cr += [" ".join([j.strip () for j in i.split(" ")][3:])]
-    else:
-      _cr += [i]
+  for i in temp:
+    _cr += [" ".join([j.strip() for j in i.split(" ")][3:])]
   for count, i in enumerate(_cr):
     k = [j.strip() for j in i.split("(duration in minutes:")]
     task = k[0]
@@ -89,7 +77,7 @@ def clean_up(gpt_response, prompt=""):
     cr += [[task, duration]]
 
   total_expected_min = int(prompt.split("(total duration in minutes")[-1]
-                                 .split("):")[0].strip())
+                                 .strip().split(")")[0].strip())
 
   # TODO -- now, you need to make sure that this is the same as the sum of
   #         the current action sequence.
@@ -105,9 +93,7 @@ def clean_up(gpt_response, prompt=""):
   curr_min_slot = curr_min_slot[1:]
 
   if len(curr_min_slot) > total_expected_min:
-    last_task = curr_min_slot[60]
-    for i in range(1, 6):
-      curr_min_slot[-1 * i] = last_task
+    curr_min_slot = curr_min_slot[:total_expected_min]
   elif len(curr_min_slot) < total_expected_min:
     last_task = curr_min_slot[-1]
     for i in range(total_expected_min - len(curr_min_slot)):
@@ -124,13 +110,11 @@ def clean_up(gpt_response, prompt=""):
   return cr
 
 def validate(gpt_response, prompt=""):
-  # TODO -- this sometimes generates error
   try:
-    clean_up(gpt_response)
+    result = clean_up(gpt_response, prompt)
+    return len(result) > 0
   except:
-    pass
-    # return False
-  return gpt_response
+    return False
 
 def fail_safe():
   fs = ["asleep"]
@@ -150,33 +134,14 @@ def run_gpt_prompt_task_decomp(persona,
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe()
 
-  print ("?????")
-  print (prompt)
   output = safe_generate_response(prompt, GPT_PARAM, REPEAT, fail_safe(),
                                    validate, clean_up)
 
-  # TODO THERE WAS A BUG HERE...
-  # This is for preventing overflows...
-  """
-  File "/Users/joonsungpark/Desktop/Stanford/Projects/
-  generative-personas/src_exploration/reverie_simulation/
-  brain/get_next_action_v3.py", line 364, in run_gpt_prompt_task_decomp
-  fin_output[-1][1] += (duration - ftime_sum)
-  IndexError: list index out of range
-  """
-
-  print ("IMPORTANT VVV DEBUG")
-
-  # print (prompt_input)
-  # print (prompt)
-  print (output)
-
+  # Clamp output to the requested duration to prevent overflows
   fin_output = []
   time_sum = 0
   for i_task, i_duration in output:
     time_sum += i_duration
-    # HM?????????
-    # if time_sum < duration:
     if time_sum <= duration:
       fin_output += [[i_task, i_duration]]
     else:
@@ -184,8 +149,6 @@ def run_gpt_prompt_task_decomp(persona,
   ftime_sum = 0
   for fi_task, fi_duration in fin_output:
     ftime_sum += fi_duration
-
-  # print ("for debugging... line 365", fin_output)
   fin_output[-1][1] += (duration - ftime_sum)
   output = fin_output
 

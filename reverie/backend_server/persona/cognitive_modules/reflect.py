@@ -44,7 +44,7 @@ def generate_insights_and_evidence(persona, nodes, n=5):
 
   ret = run_gpt_prompt_insight_and_guidance(persona, statements, n)[0]
 
-  print (ret)
+  if debug: print (ret)
   try: 
 
     for thought, evi_raw in ret.items(): 
@@ -146,8 +146,9 @@ def reflection_trigger(persona):
     True if we are running a new reflection. 
     False otherwise. 
   """
-  print (persona.scratch.name, "persona.scratch.importance_trigger_curr::", persona.scratch.importance_trigger_curr)
-  print (persona.scratch.importance_trigger_max)
+  if debug:
+    print (persona.scratch.name, "importance_trigger_curr:", persona.scratch.importance_trigger_curr,
+           "/ max:", persona.scratch.importance_trigger_max)
 
   if (persona.scratch.importance_trigger_curr <= 0 and 
       [] != persona.a_mem.seq_event + persona.a_mem.seq_thought): 

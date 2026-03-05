@@ -11,8 +11,6 @@ SPECIAL_INSTRUCTION = 'The output should be a list of list where the inner lists
 
 
 def clean_up(gpt_response, prompt=""):
-  print (gpt_response)
-
   gpt_response = (prompt + gpt_response).split("Here is their conversation.")[-1].strip()
   content = re.findall('"([^"]*)"', gpt_response)
 
@@ -39,12 +37,6 @@ def fail_safe():
   return "..."
 
 def chat_clean_up(gpt_response, prompt=""):
-  # ret = ast.literal_eval(gpt_response)
-
-  print ("a;dnfdap98fh4p9enf HEREE!!!")
-  for row in gpt_response:
-    print (row)
-
   return gpt_response
 
 def chat_validate(gpt_response, prompt=""):
@@ -64,8 +56,6 @@ def create_prompt_input(maze, persona, target_persona, curr_context, init_summ_i
   if persona.a_mem.seq_chat:
     if int((persona.scratch.curr_time - persona.a_mem.seq_chat[-1].created).total_seconds()/60) > 480:
       prev_convo_insert = ""
-  print (prev_convo_insert)
-
   curr_sector = f"{maze.access_tile(persona.scratch.curr_tile)['sector']}"
   curr_arena= f"{maze.access_tile(persona.scratch.curr_tile)['arena']}"
   curr_location = f"{curr_arena} in {curr_sector}"

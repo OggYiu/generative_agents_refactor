@@ -38,14 +38,10 @@ def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=Fal
     generate_prompt,
   )
 
-  print ("11")
   prompt_input = create_prompt_input(comment)
-  print ("22")
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
-  print (prompt)
   fail_safe_val = fail_safe()
   output = ChatGPT_safe_generate_response_OLD(prompt, REPEAT, fail_safe_val,
                         chat_validate, chat_clean_up, verbose)
-  print (output)
 
   return output, [output, prompt, GPT_PARAM, prompt_input, fail_safe_val]

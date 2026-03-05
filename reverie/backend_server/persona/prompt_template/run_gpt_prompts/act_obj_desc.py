@@ -51,8 +51,7 @@ def chat_validate(gpt_response, prompt=""):
 def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=False):
   from persona.prompt_template.gpt_structure import generate_prompt, ChatGPT_safe_generate_response
 
-  print ("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 6") ########
-  prompt_input = create_prompt_input(act_game_object, act_desp, persona)  ########
+  prompt_input = create_prompt_input(act_game_object, act_desp, persona)
   prompt = generate_prompt(prompt_input, PROMPT_TEMPLATE)
   fail_safe_val = fail_safe(act_game_object) ########
   output = ChatGPT_safe_generate_response(prompt, EXAMPLE_OUTPUT, SPECIAL_INSTRUCTION, REPEAT, fail_safe_val,

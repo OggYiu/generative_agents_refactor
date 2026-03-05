@@ -42,5 +42,5 @@ Current Date: Monday February 13
 [(ID:vFhbNU) Monday February 13 -- 05:00 AM] Activity: Isabella is sleeping
 
 
-Here the originally intended hourly breakdown of Isabella's schedule today: 1) wake up and complete the morning routine at 6:00 am, 2) wake up and complete the morning routine at 6:00 am, 3) eat breakfast at 7:00 am, 4) read a book from 8:00 am to 12:00 pm, 5) have lunch at 12:00 pm, 6) take a nap from 1:00 pm to 4:00 pm, 7) relax and watch TV from 7:00 pm to 8:00 pm, 8) go to bed at 11:00 pm
+Here the originally intended hourly breakdown of Isabella's schedule today: 1) wake up and complete the morning routine at 6:00 am, 2) Prepare and open Hobbs Cafe at 8:00 am, 3) Work at the counter and serve customers from 8:00 am to 12:00 pm, 4) Have lunch and take a short break from 12:00 pm to 1:00 pm, 5) Continue working at the counter and preparing for the Valentine's Day party from 1:00 pm to 5:00 pm, 6) Work at the counter and serve customers from 5:00 pm to 8:00 pm, 7) Close Hobbs Cafe and clean up from 8:00 pm to 9:00 pm, 8) Relax and finalize Valentine's Day party plans from 9:00 pm to 11:00 pm
 [(ID:LKE8he) Monday February 13 -- 06:00 AM] Activity: Isabella is

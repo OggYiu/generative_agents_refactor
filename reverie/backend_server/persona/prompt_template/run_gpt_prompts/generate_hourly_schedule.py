@@ -62,13 +62,16 @@ def create_prompt_input(persona,
 
 
 def clean_up(gpt_response, prompt=""):
-  cr = gpt_response.strip()
-  if cr[-1] == ".":
+  # Take only the first line — guards against chat models returning full schedules
+  cr = gpt_response.strip().split("\n")[0].strip()
+  if cr.endswith("."):
     cr = cr[:-1]
   return cr
 
 def validate(gpt_response, prompt=""):
-  try: clean_up(gpt_response, prompt="")
+  try:
+    result = clean_up(gpt_response, prompt="")
+    return len(result) > 0
   except: return False
   return True
 

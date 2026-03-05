@@ -100,8 +100,6 @@ def run_gpt_prompt_action_sector(action_description,
     # output = random.choice(x)
     output = persona.scratch.living_area.split(":")[1]
 
-  print ("DEBUG", random.choice(x), "------", output)
-
   if debug or verbose:
     print_run_prompts(PROMPT_TEMPLATE, persona, GPT_PARAM,
                       prompt_input, prompt, output)
